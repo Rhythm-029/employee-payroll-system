@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -109,7 +111,7 @@
                         <div class="card border-0 shadow-sm p-4 h-100">
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h5 class="fw-bold">Recent Payroll Activities</h5>
-                                <button class="btn btn-sm btn-light">View All</button>
+                                <button class="btn btn-sm btn-light" onclick="showToast('Info', 'Loading all payroll history...', 'info')">View All</button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle">
@@ -163,8 +165,8 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h5 class="fw-bold mb-0">Employee Database (42 Records)</h5>
                         <div class="d-flex gap-2">
-                            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-download me-1"></i> Export</button>
-                            <button class="btn btn-primary-custom btn-sm"><i class="fas fa-plus me-1"></i> Add Employee</button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="downloadReport('Employee Database')"><i class="fas fa-download me-1"></i> Export</button>
+                            <button class="btn btn-primary-custom btn-sm" onclick="simulateAddEmployee()"><i class="fas fa-plus me-1"></i> Add Employee</button>
                         </div>
                     </div>
                     <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
@@ -199,14 +201,14 @@
                             <div class="p-4 bg-light rounded-4 text-center">
                                 <h6 class="text-secondary small fw-bold">TAX DEDUCTION RATE</h6>
                                 <h3 class="fw-bold text-primary">10% - 20%</h3>
-                                <button class="btn btn-sm btn-outline-primary mt-2">Update Rules</button>
+                                <button class="btn btn-sm btn-outline-primary mt-2" onclick="showToast('Success', 'Tax rules updated.', 'success')">Update Rules</button>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="p-4 bg-light rounded-4 text-center">
                                 <h6 class="text-secondary small fw-bold">TOTAL DISBURSEMENT</h6>
                                 <h3 class="fw-bold text-success">₹ 28,45,000</h3>
-                                <button class="btn btn-sm btn-success mt-2">Release Now</button>
+                                <button class="btn btn-sm btn-success mt-2" onclick="simulatePayrollRelease()">Release Now</button>
                             </div>
                         </div>
                     </div>
@@ -221,14 +223,6 @@
                         <div class="col-md-3">
                             <label class="small fw-bold text-secondary">Select Date</label>
                             <input type="date" class="form-control" value="2026-04-14">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="small fw-bold text-secondary">Department</label>
-                            <select class="form-select">
-                                <option>Engineering</option>
-                                <option>Finance</option>
-                                <option>HR & Ops</option>
-                            </select>
                         </div>
                     </div>
                     <div class="table-responsive">
@@ -272,14 +266,14 @@
                             <div class="card border border-light shadow-sm p-4 h-100">
                                 <h6 class="fw-bold mb-3"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i> Budget Forecast</h6>
                                 <p class="text-secondary small">Projected salary expense for Q2: <strong>₹ 85.5 Lakhs</strong></p>
-                                <button class="btn btn-primary-custom w-100 mt-auto">Download PDF</button>
+                                <button class="btn btn-primary-custom w-100 mt-auto" onclick="downloadReport('Budget Forecast Q2')">Download PDF</button>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="card border border-light shadow-sm p-4 h-100">
                                 <h6 class="fw-bold mb-3"><i class="fas fa-chart-pie me-2 text-info"></i> Department Spending</h6>
                                 <p class="text-secondary small">Engineering consumes <strong>62%</strong> of the total payroll budget.</p>
-                                <button class="btn btn-outline-primary w-100 mt-auto">View Breakdown</button>
+                                <button class="btn btn-outline-primary w-100 mt-auto" onclick="viewSpendingBreakdown()">View Breakdown</button>
                             </div>
                         </div>
                     </div>
@@ -321,8 +315,8 @@
                         </div>
                     </div>
                     <div class="mt-4 pt-3 border-top">
-                        <button class="btn btn-outline-danger w-100 mb-2">Suspend Account</button>
-                        <button class="btn btn-primary-custom w-100">Update Salary Structure</button>
+                        <button class="btn btn-outline-danger w-100 mb-2" id="suspendActionBtn">Suspend Account</button>
+                        <button class="btn btn-primary-custom w-100" onclick="showToast('Success', 'Salary structure update initiated.', 'success')">Update Salary Structure</button>
                     </div>
                 </div>
             </div>
@@ -331,6 +325,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="js/auth.js"></script>
     <script>checkAuth('ADMIN');</script>
     <script src="js/dashboard.js"></script>

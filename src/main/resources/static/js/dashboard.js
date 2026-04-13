@@ -9,12 +9,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Dashboard data if on Admin page
     if (document.getElementById('employeesTableBody')) {
-        renderEmployees();
+        initializeData();
     }
 });
 
+/**
+ * Initialize data from API or Mock Fallback
+ */
+async function initializeData() {
+    try {
+        const response = await fetch('/api/management/employees');
+        if (response.ok) {
+            const liveEmployees = await response.json();
+            if (liveEmployees && liveEmployees.length > 0) {
+                console.log('Loading live employee data...');
+                renderEmployees(liveEmployees);
+                return;
+            }
+        }
+    } catch (err) {
+        console.warn('Backend API not reachable. Falling back to local mock data.', err);
+    }
+    
+    // Fallback to local mock data
+    renderEmployees(mockEmployees);
+}
+
 // Mock Data for 42 Indian Employees
-const employees = [
+const mockEmployees = [
     { id: 'PAY-101', name: 'Rhythm Singhal', role: 'EMPLOYEE', designation: 'Senior Developer', type: 'FullTime', salary: 85000, status: 'Active', shift: '09:00 - 18:00' },
     { id: 'PAY-102', name: 'Yashwardhan Singh', role: 'ADMIN', designation: 'Project Manager', type: 'FullTime', salary: 95000, status: 'Active', shift: '10:00 - 19:00' },
     { id: 'PAY-103', name: 'Prathamesh Bhandare', role: 'EMPLOYEE', designation: 'Tech Lead', type: 'FullTime', salary: 90000, status: 'Active', shift: '09:00 - 18:00' },
@@ -62,12 +84,14 @@ const employees = [
 /**
  * Render workers table in Admin Portal
  */
-function renderEmployees() {
+function renderEmployees(dataList) {
     const tableBody = document.getElementById('employeesTableBody');
     if (!tableBody) return;
 
+    const listToRender = dataList || mockEmployees;
     tableBody.innerHTML = '';
-    employees.forEach(emp => {
+    
+    listToRender.forEach(emp => {
         const row = `
             <tr>
                 <td>${emp.id}</td>
@@ -77,9 +101,9 @@ function renderEmployees() {
                         ${emp.name}
                     </div>
                 </td>
-                <td><span class="badge bg-secondary-subtle text-secondary small">${emp.role}</span></td>
-                <td>${emp.designation}</td>
-                <td><span class="badge bg-success">${emp.status}</span></td>
+                <td><span class="badge bg-secondary-subtle text-secondary small">${emp.role || 'EMPLOYEE'}</span></td>
+                <td>${emp.designation || 'Staff'}</td>
+                <td><span class="badge bg-success">${emp.status || 'Active'}</span></td>
                 <td>
                     <button class="btn btn-sm btn-outline-info me-1" onclick="viewEmployeeDetails('${emp.id}')">
                         <i class="fas fa-eye"></i>
@@ -98,18 +122,168 @@ function renderEmployees() {
  * Open employee details Modal
  */
 function viewEmployeeDetails(id) {
-    const emp = employees.find(e => e.id === id);
+    const emp = mockEmployees.find(e => e.id === id);
     if (!emp) return;
     
-    // Set dynamic content in Modal (assuming Modal IDs exist in HTML)
     document.getElementById('modalEmpName').textContent = emp.name;
     document.getElementById('modalEmpId').textContent = emp.id;
     document.getElementById('modalEmpDesignation').textContent = emp.designation;
     document.getElementById('modalEmpSalary').textContent = `₹ ${emp.salary.toLocaleString('en-IN')}`;
     document.getElementById('modalEmpShift').textContent = emp.shift;
     
+    // Manage Suspend Button State
+    const actionBtn = document.getElementById('suspendActionBtn');
+    if (actionBtn) {
+        actionBtn.setAttribute('onclick', `suspendEmployee('${emp.id}')`);
+        actionBtn.textContent = (emp.status === 'Suspended') ? 'Reactivate Account' : 'Suspend Account';
+        actionBtn.className = (emp.status === 'Suspended') ? 'btn btn-outline-success w-100 mb-2' : 'btn btn-outline-danger w-100 mb-2';
+    }
+
     const myModal = new bootstrap.Modal(document.getElementById('employeeDetailsModal'));
     myModal.show();
+}
+
+/**
+ * SIMULATION: Suspend/Reactivate Employee
+ */
+function suspendEmployee(id) {
+    const emp = mockEmployees.find(e => e.id === id);
+    if (!emp) return;
+
+    if (emp.status === 'Active') {
+        emp.status = 'Suspended';
+        showToast('Account Suspended', `Account for ${emp.name} has been restricted.`, 'error');
+    } else {
+        emp.status = 'Active';
+        showToast('Account Reactivated', `${emp.name} is now back to Active status.`, 'success');
+    }
+
+    renderEmployees(); // Refresh table
+    
+    // Close modal
+    const modalInstance = bootstrap.Modal.getInstance(document.getElementById('employeeDetailsModal'));
+    if (modalInstance) modalInstance.hide();
+}
+
+/**
+ * SIMULATION: Add Employee
+ */
+function simulateAddEmployee() {
+    Swal.fire({
+        title: 'Add New Employee',
+        html: `
+            <input id="swal-name" class="swal2-input" placeholder="Full Name">
+            <input id="swal-role" class="swal2-input" placeholder="Designation (e.g. Senior Dev)">
+            <input id="swal-salary" class="swal2-input" placeholder="Salary (Base)">
+        `,
+        focusConfirm: false,
+        preConfirm: () => {
+            return {
+                name: document.getElementById('swal-name').value,
+                role: document.getElementById('swal-role').value,
+                salary: document.getElementById('swal-salary').value
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const newEmp = {
+                id: `PAY-${143 + mockEmployees.length}`,
+                name: result.value.name,
+                designation: result.value.role,
+                role: 'EMPLOYEE',
+                salary: parseInt(result.value.salary) || 50000,
+                status: 'Active',
+                shift: '09:00 - 18:00'
+            };
+            mockEmployees.unshift(newEmp); // Add to top
+            renderEmployees();
+            showToast('Employee Added', `${newEmp.name} has been onboarded successfully.`, 'success');
+        }
+    });
+}
+
+/**
+ * SIMULATION: Payroll Release
+ */
+function simulatePayrollRelease() {
+    Swal.fire({
+        title: 'Disburse Payroll?',
+        text: "You are about to release ₹ 28.5L for April 2026 cycle.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#4f46e5',
+        confirmButtonText: 'Yes, Release Now'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let timerInterval;
+            Swal.fire({
+                title: 'Processing Transfers...',
+                html: 'Bank communication established. <b></b> milliseconds remaining.',
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                    const b = Swal.getHtmlContainer().querySelector('b');
+                    timerInterval = setInterval(() => {
+                        b.textContent = Swal.getTimerLeft();
+                    }, 100);
+                },
+                willClose: () => clearInterval(timerInterval)
+            }).then(() => {
+                showToast('Success', 'Payroll has been disbursed to all employees.', 'success');
+            });
+        }
+    });
+}
+
+/**
+ * SIMULATION: Reports & Data
+ */
+function viewSpendingBreakdown() {
+    Swal.fire({
+        title: 'Department Spending Breakdown',
+        html: `
+            <div class="text-start mt-3">
+                <p>Engineering: <b>₹ 18.2L (62%)</b></p>
+                <div class="progress mb-3"><div class="progress-bar" style="width: 62%"></div></div>
+                <p>Human Resources: <b>₹ 4.1L (14%)</b></p>
+                <div class="progress mb-3"><div class="progress-bar bg-info" style="width: 14%"></div></div>
+                <p>Operations: <b>₹ 6.2L (24%)</b></p>
+                <div class="progress"><div class="progress-bar bg-success" style="width: 24%"></div></div>
+            </div>
+        `,
+        confirmButtonText: 'Close'
+    });
+}
+
+function downloadReport(name) {
+    showToast('Download Started', `Preparing ${name} and generating unique PDF index...`, 'info');
+    setTimeout(() => {
+        showToast('Download Complete', `${name} is ready.`, 'success');
+    }, 1500);
+}
+
+/**
+ * Helper: Show Toast notification
+ */
+function showToast(title, text, icon) {
+    Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
+}
+
+/**
+ * Employee Specific: Update Profile
+ */
+function updateProfile() {
+    showToast('Profile Updated', 'Your contact details have been synced with HR records.', 'success');
 }
 
 /**

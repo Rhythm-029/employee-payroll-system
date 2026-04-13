@@ -16,38 +16,69 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle Login submission
     if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
             const password = passwordInput.value.trim();
             const selectedRole = document.querySelector('input[name="loginRole"]:checked').value;
 
-            // Mock Credentials (Validation Logic)
-            // In a real app, this would be an API call POST /api/auth/login
-            const ADMIN_EMAIL = 'admin@hr.com';
-            const ADMIN_PASS = 'admin123';
-            const EMP_EMAIL = 'emp@hr.com';
-            const EMP_PASS = 'emp123';
+            try {
+                // LIVE API CALL (The "Join")
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, role: selectedRole })
+                });
 
-            // Validation step: Check if role matches email
-            if (selectedRole === 'ADMIN') {
-                if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
-                    localStorage.setItem('userRole', 'ADMIN');
-                    localStorage.setItem('userName', 'Admin User');
-                    window.location.href = 'admin_dashboard.html';
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    // Update session and redirect
+                    localStorage.setItem('userRole', data.role);
+                    localStorage.setItem('userName', data.name);
+                    
+                    if (data.role === 'ADMIN') {
+                        window.location.href = 'admin_dashboard.html';
+                    } else {
+                        window.location.href = 'employee_dashboard.html';
+                    }
                 } else {
-                    showError('Invalid HR credentials.');
+                    showError(data.message || 'Invalid credentials.');
                 }
-            } else {
-                if (email === EMP_EMAIL && password === EMP_PASS) {
-                    localStorage.setItem('userRole', 'EMPLOYEE');
-                    localStorage.setItem('userName', 'John Doe');
-                    window.location.href = 'employee_dashboard.html';
-                } else {
-                    showError('Invalid Employee credentials.');
-                }
+            } catch (err) {
+                // FALLBACK for demo if backend isn't running
+                console.warn('Backend not detected, using mock validation.', err);
+                handleMockLogin(email, password, selectedRole);
             }
         });
+    }
+
+    /**
+     * Fallback logic for demo purposes
+     */
+    function handleMockLogin(email, password, selectedRole) {
+        const ADMIN_EMAIL = 'admin@hr.com';
+        const ADMIN_PASS = 'admin123';
+        const EMP_EMAIL = 'emp@hr.com';
+        const EMP_PASS = 'emp123';
+
+        if (selectedRole === 'ADMIN') {
+            if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
+                localStorage.setItem('userRole', 'ADMIN');
+                localStorage.setItem('userName', 'Admin User');
+                window.location.href = 'admin_dashboard.html';
+            } else {
+                showError('Invalid HR credentials.');
+            }
+        } else {
+            if (email === EMP_EMAIL && password === EMP_PASS) {
+                localStorage.setItem('userRole', 'EMPLOYEE');
+                localStorage.setItem('userName', 'Rhythm Singhal');
+                window.location.href = 'employee_dashboard.html';
+            } else {
+                showError('Invalid Employee credentials.');
+            }
+        }
     }
 
     function showError(msg) {
