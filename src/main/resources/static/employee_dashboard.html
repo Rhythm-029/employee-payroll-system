@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Portal | PayrollPro</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="px-4 mb-4 text-center">
+            <h4 class="fw-bold"><i class="fas fa-user-tie me-2" style="color: #3498db;"></i>Employee</h4>
+            <hr class="text-white-50">
+        </div>
+        <nav>
+            <a href="#" class="sidebar-link active" onclick="showSection('dashboard')">
+                <i class="fas fa-home"></i> <span>Overview</span>
+            </a>
+            <a href="#" class="sidebar-link" onclick="showSection('salary')">
+                <i class="fas fa-money-bill-wave"></i> <span>My Salary</span>
+            </a>
+            <a href="#" class="sidebar-link" onclick="showSection('attendance')">
+                <i class="fas fa-calendar-alt"></i> <span>Attendance</span>
+            </a>
+            <a href="#" class="sidebar-link" onclick="showSection('shift')">
+                <i class="fas fa-clock"></i> <span>Shift Details</span>
+            </a>
+            <a href="#" class="sidebar-link" onclick="showSection('profile')">
+                <i class="fas fa-id-card"></i> <span>My Profile</span>
+            </a>
+            <hr class="mx-3 text-white-50">
+            <a href="#" class="sidebar-link text-warning" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Navbar -->
+        <header class="navbar-sleek d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="h3 fw-bold mb-0">Employee Portal</h1>
+                <p id="empName" class="text-secondary small mb-0 fw-bold">Welcome, ---</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-secondary position-relative">
+                    <i class="fas fa-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">2</span>
+                </button>
+                <div class="dropdown">
+                    <div class="d-flex align-items-center cursor-pointer" data-bs-toggle="dropdown">
+                        <img id="empProfileImg" src="https://ui-avatars.com/api/?name=Employee&background=3498db&color=fff" class="rounded-circle shadow-sm" width="45" height="45">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Sections -->
+        <div id="contentSections">
+            <!-- Overview Section -->
+            <section id="dashboard" class="animated">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="card stat-card p-4 bg-primary text-white border-0 shadow">
+                            <h6 class="text-white-50 small fw-bold mb-1">LAST CREDITED</h6>
+                            <h2 class="fw-bold mb-0">₹ 85,000</h2>
+                            <p class="small mt-2 mb-0"><i class="fas fa-calendar-check me-1"></i> Paid: 01 April 2026</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card p-4 bg-white border-start border-success border-4 shadow-sm">
+                            <h6 class="text-secondary small fw-bold mb-1">ATTENDANCE (MONTH)</h6>
+                            <h2 class="fw-bold mb-0">12 / 14</h2>
+                            <p class="text-success small mt-2 mb-0">92% Attendance</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card p-4 bg-white border-start border-info border-4 shadow-sm">
+                            <h6 class="text-secondary small fw-bold mb-1">LEAVES BALANCE</h6>
+                            <h2 class="fw-bold mb-0">04</h2>
+                            <p class="text-info small mt-2 mb-0">Pending Approval: 1</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm p-4">
+                    <h5 class="fw-bold mb-4">Salary History</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Period</th>
+                                    <th>Basic Pay</th>
+                                    <th>Allowances</th>
+                                    <th>Deductions</th>
+                                    <th>Net Salary</th>
+                                    <th>Download</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>March 2026</td>
+                                    <td>₹ 75,000</td>
+                                    <td>₹ 10,000</td>
+                                    <td>₹ 5,000</td>
+                                    <td class="fw-bold text-success">₹ 80,000</td>
+                                    <td><button class="btn btn-sm btn-outline-primary"><i class="fas fa-file-pdf"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td>February 2026</td>
+                                    <td>₹ 75,000</td>
+                                    <td>₹ 8,000</td>
+                                    <td>₹ 4,000</td>
+                                    <td class="fw-bold text-success">₹ 79,000</td>
+                                    <td><button class="btn btn-sm btn-outline-primary"><i class="fas fa-file-pdf"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Salary Details Section -->
+            <section id="salary" class="d-none animated">
+                <div class="card border-0 shadow-sm p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0">Salary Breakdown (April 2026)</h5>
+                        <button class="btn btn-primary-custom btn-sm"><i class="fas fa-download me-2"></i> Download Slip</button>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-4 bg-light rounded-4">
+                                <h6 class="fw-bold text-primary mb-3">EARNINGS</h6>
+                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Basic Salary</span><span class="fw-bold">₹ 75,000</span></div>
+                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>House Rent Allowance</span><span class="fw-bold">₹ 5,000</span></div>
+                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Special Bonus</span><span class="fw-bold text-success">+ ₹ 5,000</span></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-4 bg-light rounded-4">
+                                <h6 class="fw-bold text-danger mb-3">DEDUCTIONS</h6>
+                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Income Tax (TDS)</span><span class="fw-bold text-danger">- ₹ 4,500</span></div>
+                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Provident Fund</span><span class="fw-bold text-danger">- ₹ 2,000</span></div>
+                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Professional Tax</span><span class="fw-bold text-danger">- ₹ 500</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Attendance Section -->
+            <section id="attendance" class="d-none animated">
+                <div class="card border-0 shadow-sm p-4">
+                    <h5 class="fw-bold mb-4">My Attendance (Current Month)</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Check-in</th>
+                                    <th>Check-out</th>
+                                    <th>Working Hours</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>13 April 2026</td><td>09:05 AM</td><td>06:15 PM</td><td>9h 10m</td><td><span class="badge bg-success">Present</span></td></tr>
+                                <tr><td>12 April 2026</td><td>09:15 AM</td><td>06:05 PM</td><td>8h 50m</td><td><span class="badge bg-success">Present</span></td></tr>
+                                <tr><td>11 April 2026</td><td>--:--</td><td>--:--</td><td>0h 00m</td><td><span class="badge bg-danger">Absent</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Shift Details Section -->
+            <section id="shift" class="d-none animated">
+                <div class="card border-0 shadow-sm p-4">
+                    <h5 class="fw-bold mb-4">My Shift & Rosters</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="p-4 border border-light rounded-4 bg-white shadow-sm h-100">
+                                <h6 class="text-secondary small fw-bold mb-3">CURRENT SHIFT</h6>
+                                <h2 class="fw-bold text-primary">Standard Shift</h2>
+                                <p class="mb-0 fs-5"><i class="far fa-clock me-2"></i> 09:00 AM - 06:00 PM</p>
+                                <p class="text-secondary mt-2">Team: Engineering (Core)</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-4 border border-light rounded-4 bg-light h-100">
+                                <h6 class="text-secondary small fw-bold mb-3">UPCOMING SHIFT CHANGE</h6>
+                                <p class="text-secondary italic">No upcoming shift changes scheduled for this month.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="profile" class="d-none animated">
+                <div class="card border-0 shadow-sm p-5">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            <img src="https://ui-avatars.com/api/?name=Rhythm+Singhal&background=3498db&color=fff" class="rounded-circle shadow mb-4" width="150" height="150">
+                            <button class="btn btn-sm btn-outline-primary">Update Picture</button>
+                        </div>
+                        <div class="col-md-9">
+                            <h2 class="fw-bold mb-1">Rhythm Singhal</h2>
+                            <p class="text-primary fw-bold mb-4">Senior Software Engineer (PAY-101)</p>
+                            
+                            <div class="row g-4">
+                                <div class="col-sm-6">
+                                    <label class="small text-secondary fw-bold">Official Email</label>
+                                    <p class="fs-5">rhythm.s@payroll.com</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="small text-secondary fw-bold">D.O.J</label>
+                                    <p class="fs-5">15 June 2024</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="small text-secondary fw-bold">Phone Number</label>
+                                    <p class="fs-5">+91 98765 43210</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="small text-secondary fw-bold">Address</label>
+                                    <p class="fs-5">Mumbai, Maharashtra, India</p>
+                                </div>
+                            </div>
+                            <div class="mt-5">
+                                <button class="btn btn-primary-custom px-5">Edit Profile Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script>checkAuth('EMPLOYEE');</script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
