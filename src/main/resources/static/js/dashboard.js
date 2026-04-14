@@ -283,7 +283,50 @@ function showToast(title, text, icon) {
  * Employee Specific: Update Profile
  */
 function updateProfile() {
-    showToast('Profile Updated', 'Your contact details have been synced with HR records.', 'success');
+    const userEmail = localStorage.getItem('userEmail');
+    if (!userEmail) {
+        showToast('Profile Update', 'Please log in again to update your password.', 'info');
+        return;
+    }
+
+    const currentPassword = prompt('Enter your current password to update your profile settings:');
+    if (!currentPassword) return;
+
+    const newPassword = prompt('Enter your new password:');
+    if (!newPassword) return;
+
+    const confirmPassword = prompt('Confirm your new password:');
+    if (newPassword !== confirmPassword) {
+        showToast('Update Failed', 'The passwords did not match. Please try again.', 'error');
+        return;
+    }
+
+    const updateMessageElem = document.getElementById('profileUpdateMessage');
+    if (updateMessageElem) {
+        updateMessageElem.classList.add('d-none');
+        updateMessageElem.textContent = '';
+    }
+
+    fetch('/api/auth/update-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, oldPassword: currentPassword.trim(), newPassword: newPassword.trim() })
+    })
+    .then((res) => res.json())
+    .then((data) => {
+        if (data.status === 'success') {
+            showToast('Password Updated', data.message || 'Your password has been updated.', 'success');
+            if (updateMessageElem) {
+                updateMessageElem.textContent = data.message || 'Your password has been updated successfully.';
+                updateMessageElem.classList.remove('d-none');
+            }
+        } else {
+            showToast('Update Failed', data.message || 'Unable to update your password.', 'error');
+        }
+    })
+    .catch(() => {
+        showToast('Update Failed', 'Unable to update password at this time.', 'error');
+    });
 }
 
 /**

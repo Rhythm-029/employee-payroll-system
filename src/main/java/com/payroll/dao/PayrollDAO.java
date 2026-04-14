@@ -12,7 +12,7 @@ public class PayrollDAO {
      * Generate a payroll record for an employee.
      */
     public void generatePayroll(int employeeId, String month, double finalSalary) throws SQLException {
-        String query = "INSERT INTO payroll (employee_id, month, final_salary) VALUES (?, ?, ?)";
+        String query = "INSERT INTO payroll (employee_id, month_name, final_salary) VALUES (?, ?, ?)";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement pst = con.prepareStatement(query)) {
             

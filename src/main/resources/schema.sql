@@ -30,7 +30,7 @@ CREATE TABLE employees (
 CREATE TABLE payroll (
     id INT PRIMARY KEY AUTO_INCREMENT,
     employee_id INT NOT NULL,
-    month VARCHAR(20) NOT NULL,
+    month_name VARCHAR(20) NOT NULL,
     final_salary DOUBLE NOT NULL,
     generated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
@@ -54,3 +54,13 @@ INSERT INTO users (name, email, password, role) VALUES
 -- Link users to employees (Rhythm Singhal is EMP-1)
 INSERT INTO employees (user_id, type, base_salary, bonus, tax_percentage, leaves_taken, shift_time) 
 VALUES (2, 'FullTime', 85000.0, 5000.0, 10.0, 2, '09:00 AM - 06:00 PM');
+
+-- Password reset tokens for email-based reset workflow
+CREATE TABLE password_reset_tokens (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    user_id INT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
