@@ -73,8 +73,8 @@
                     <div class="col-md-4">
                         <div class="card stat-card p-4 bg-primary text-white border-0 shadow">
                             <h6 class="text-white-50 small fw-bold mb-1">LAST CREDITED</h6>
-                            <h2 class="fw-bold mb-0">₹ 85,000</h2>
-                            <p class="small mt-2 mb-0"><i class="fas fa-calendar-check me-1"></i> Paid: 01 April 2026</p>
+                            <h2 class="fw-bold mb-0" id="lastSalary">₹ 0</h2>
+                            <p class="small mt-2 mb-0"><i class="fas fa-calendar-check me-1"></i> Paid: Current Cycle</p>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -86,9 +86,9 @@
                     </div>
                     <div class="col-md-4">
                         <div class="card stat-card p-4 bg-white border-start border-info border-4 shadow-sm">
-                            <h6 class="text-secondary small fw-bold mb-1">LEAVES BALANCE</h6>
-                            <h2 class="fw-bold mb-0">04</h2>
-                            <p class="text-info small mt-2 mb-0">Pending Approval: 1</p>
+                            <h6 class="text-secondary small fw-bold mb-1">LEAVES TAKEN</h6>
+                            <h2 class="fw-bold mb-0" id="leavesLeft">0</h2>
+                            <p class="text-info small mt-2 mb-0">Month: April</p>
                         </div>
                     </div>
                 </div>
@@ -134,24 +134,23 @@
             <section id="salary" class="d-none animated">
                 <div class="card border-0 shadow-sm p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="fw-bold mb-0">Salary Breakdown (April 2026)</h5>
-                        <button class="btn btn-primary-custom btn-sm" onclick="downloadReport('Salary Slip - April 2026')"><i class="fas fa-download me-2"></i> Download Slip</button>
+                        <h5 class="fw-bold mb-0">Salary Breakdown (Current Month)</h5>
+                        <button class="btn btn-primary-custom btn-sm" id="downloadSlipBtn"><i class="fas fa-download me-2"></i> Download Slip</button>
                     </div>
                     <div class="row g-4">
                         <div class="col-md-6">
                             <div class="p-4 bg-light rounded-4">
                                 <h6 class="fw-bold text-primary mb-3">EARNINGS</h6>
-                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Basic Salary</span><span class="fw-bold">₹ 75,000</span></div>
-                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>House Rent Allowance</span><span class="fw-bold">₹ 5,000</span></div>
-                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Special Bonus</span><span class="fw-bold text-success">+ ₹ 5,000</span></div>
+                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Basic Salary</span><span class="fw-bold" id="breakdownBase">₹ 0</span></div>
+                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>House Rent Allowance</span><span class="fw-bold">₹ 0</span></div>
+                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Special Bonus</span><span class="fw-bold text-success" id="breakdownBonus">+ ₹ 0</span></div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="p-4 bg-light rounded-4">
                                 <h6 class="fw-bold text-danger mb-3">DEDUCTIONS</h6>
-                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Income Tax (TDS)</span><span class="fw-bold text-danger">- ₹ 4,500</span></div>
-                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Provident Fund</span><span class="fw-bold text-danger">- ₹ 2,000</span></div>
-                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Professional Tax</span><span class="fw-bold text-danger">- ₹ 500</span></div>
+                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Income Tax (TDS)</span><span class="fw-bold text-danger" id="breakdownTax">- ₹ 0</span></div>
+                                <div class="d-flex justify-content-between py-2 border-bottom border-white"><span>Net Take-home</span><span class="fw-bold text-primary" id="netSalary">₹ 0</span></div>
                             </div>
                         </div>
                     </div>
@@ -211,17 +210,22 @@
                 <div class="card border-0 shadow-sm p-5">
                     <div class="row align-items-center">
                         <div class="col-md-3 text-center">
-                            <img src="https://ui-avatars.com/api/?name=Rhythm+Singhal&background=3498db&color=fff" class="rounded-circle shadow mb-4" width="150" height="150">
-                            <button class="btn btn-sm btn-outline-primary" onclick="showToast('Feature', 'Profile picture update coming soon!', 'info')">Update Picture</button>
+                            <input type="file" id="profileImageInput" class="d-none" accept="image/*" onchange="handleImageUpload(this)">
+                            <img id="mainProfileDisplay" src="https://ui-avatars.com/api/?name=Employee&background=3498db&color=fff" class="rounded-circle shadow mb-4" width="150" height="150">
+                            <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('profileImageInput').click()">Upload Profile Picture</button>
                         </div>
-                        <div class="col-md-9">
-                            <h2 class="fw-bold mb-1">Rhythm Singhal</h2>
-                            <p class="text-primary fw-bold mb-4">Senior Software Engineer (PAY-101)</p>
+                        <div class="col-md-9" id="empProfileSection">
+                            <h2 class="fw-bold mb-1" id="profileName">Loading...</h2>
+                            <p class="text-primary fw-bold mb-4" id="profileEmpId">PAY-XXX</p>
                             
                             <div class="row g-4">
                                 <div class="col-sm-6">
                                     <label class="small text-secondary fw-bold">Official Email</label>
-                                    <p class="fs-5">rhythm.s@payroll.com</p>
+                                    <p class="fs-5" id="profileEmail">---</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="small text-secondary fw-bold">Standard Shift</label>
+                                    <p class="fs-5" id="profileShift">09:00 AM - 06:00 PM</p>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="small text-secondary fw-bold">D.O.J</label>
@@ -229,11 +233,11 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="small text-secondary fw-bold">Phone Number</label>
-                                    <p class="fs-5">+91 98765 43210</p>
+                                    <p class="fs-5" id="profilePhone">+91 98765 43210</p>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="small text-secondary fw-bold">Address</label>
-                                    <p class="fs-5">Mumbai, Maharashtra, India</p>
+                                    <p class="fs-5" id="profileAddress">Mumbai, Maharashtra, India</p>
                                 </div>
                             </div>
                             <div class="mt-5">
