@@ -24,6 +24,8 @@ async function initializeData() {
             if (liveEmployees && liveEmployees.length > 0) {
                 console.log('Loading live employee data...');
                 renderEmployees(liveEmployees);
+                renderRecentPayrollActivities(liveEmployees);
+                if(typeof generateMockAttendance === 'function') generateMockAttendance();
                 return;
             }
         }
@@ -33,6 +35,8 @@ async function initializeData() {
     
     // Fallback to local mock data
     renderEmployees(mockEmployees);
+    renderRecentPayrollActivities(mockEmployees);
+    if(typeof generateMockAttendance === 'function') generateMockAttendance();
 }
 
 // Mock Data for 42 Indian Employees
@@ -108,7 +112,7 @@ function renderEmployees(dataList) {
                     <button class="btn btn-sm btn-outline-info me-1" onclick="viewEmployeeDetails('${emp.id}')">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger">
+                    <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteEmployee('${emp.id}')">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -353,5 +357,124 @@ function showSection(sectionId) {
         if (onclickAttr && onclickAttr.includes(`'${sectionId}'`)) {
             link.classList.add('active');
         }
+    });
+}
+
+/**
+ * Filter Employees for the search bar
+ */
+function filterEmployees() {
+    const input = document.getElementById('employeeSearchInput');
+    if (!input) return;
+    const filter = input.value.toLowerCase();
+    const filteredList = mockEmployees.filter(emp => emp.name.toLowerCase().includes(filter));
+    renderEmployees(filteredList);
+}
+
+/**
+ * Render Recent Payroll Activities (Top 10)
+ */
+function renderRecentPayrollActivities(dataList) {
+    const payrollBody = document.getElementById('payrollActivitiesTableBody');
+    if (!payrollBody) return;
+    
+    payrollBody.innerHTML = '';
+    const list = dataList || mockEmployees;
+    const top10 = list.slice(0, 10);
+    
+    top10.forEach(emp => {
+        const row = `
+            <tr>
+                <td><div class="d-flex align-items-center"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=random" class="rounded-circle me-3" width="35"> ${emp.name}</div></td>
+                <td>Monthly Salary</td>
+                <td class="fw-bold">₹ ${emp.salary.toLocaleString('en-IN')}</td>
+                <td><span class="badge rounded-pill bg-success-subtle text-success px-3">Processed</span></td>
+            </tr>
+        `;
+        payrollBody.innerHTML += row;
+    });
+}
+
+/**
+ * Confirm and Delete Employee
+ */
+function confirmDeleteEmployee(id) {
+    Swal.fire({
+        title: 'Delete Employee?',
+        text: `Are you sure you want to completely remove account ${id}? This action cannot be undone.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const index = mockEmployees.findIndex(e => e.id === id);
+            if (index !== -1) {
+                mockEmployees.splice(index, 1);
+                renderEmployees();
+                showToast('Deleted!', `Employee ${id} has been removed.`, 'success');
+            }
+        }
+    });
+}
+
+/**
+ * Generate Mock Attendance for selected date
+ */
+function generateMockAttendance() {
+    const tbody = document.getElementById('attendanceTableBody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    const dateSelect = document.getElementById('attendanceDateSelect');
+    const selectedSeed = dateSelect ? new Date(dateSelect.value).getDate() : 14;
+    
+    mockEmployees.forEach((emp, index) => {
+        // pseudo-random logic to generate slight variations in time for realism based on selected date
+        const isLate = (selectedSeed + index) % 7 === 0;
+        const isAbsent = (selectedSeed + index) % 19 === 0;
+        
+        let status = isAbsent ? 'Absent' : 'Present';
+        let badgeClass = isAbsent ? 'bg-danger' : 'bg-success';
+        
+        let checkIn = isAbsent ? '--:--' : (isLate ? '09:45 AM' : '09:00 AM');
+        let checkOut = isAbsent ? '--:--' : '06:00 PM';
+        let totalTime = isAbsent ? '0h 0m' : (isLate ? '8h 15m' : '9h 0m');
+        
+        const row = `
+            <tr>
+                <td><div class="d-flex align-items-center"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=random" class="rounded-circle me-3" width="35"> ${emp.name}</div></td>
+                <td>${checkIn}</td>
+                <td>${checkOut}</td>
+                <td>${totalTime}</td>
+                <td><span class="badge ${badgeClass}">${status}</span></td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+/**
+ * View My Profile
+ */
+function viewMyProfile(e) {
+    if (e) e.preventDefault();
+    const name = localStorage.getItem('userName') || 'Admin User';
+    const email = localStorage.getItem('userEmail') || 'admin@hr.com';
+    const role = localStorage.getItem('userRole') || 'ADMIN';
+    
+    Swal.fire({
+        title: 'My Profile',
+        html: `
+            <div class="text-center mt-2">
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1a4f8a&color=fff" class="rounded-circle mb-3 shadow" width="80">
+                <h4 class="fw-bold">${name}</h4>
+                <p class="text-secondary mb-1"><i class="fas fa-envelope me-2"></i>${email}</p>
+                <span class="badge bg-primary px-3 py-1 mt-2 rounded-pill">Role: ${role}</span>
+            </div>
+        `,
+        confirmButtonText: 'Close',
+        confirmButtonColor: '#1a4f8a'
     });
 }

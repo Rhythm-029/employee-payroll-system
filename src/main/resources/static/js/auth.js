@@ -245,7 +245,30 @@ function checkAuth(role) {
 }
 
 // Function to logout
-function logout() {
+function logout(e) {
+    if (e) e.preventDefault();
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Confirm Logout',
+            text: 'Are you sure you want to safely log out of your session?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, logout'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeLogout();
+            }
+        });
+    } else {
+        if (confirm("Are you sure you want to logout?")) {
+            executeLogout();
+        }
+    }
+}
+
+function executeLogout() {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userName');
     localStorage.removeItem('userEmail');
