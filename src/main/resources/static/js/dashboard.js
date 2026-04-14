@@ -515,3 +515,50 @@ function showSection(sectionId) {
     const activeLink = document.querySelector(`.sidebar-link[onclick*="${sectionId}"]`);
     if (activeLink) activeLink.classList.add('active');
 }
+
+const staticAttendanceData = {
+    'April 2026': [
+        { date: '15 April 2026', in: '09:00 AM', out: '06:00 PM', hrs: '9h 00m', status: 'Present', class: 'bg-success' },
+        { date: '14 April 2026', in: '08:55 AM', out: '06:05 PM', hrs: '9h 10m', status: 'Present', class: 'bg-success' },
+        { date: '13 April 2026', in: '09:05 AM', out: '06:15 PM', hrs: '9h 10m', status: 'Present', class: 'bg-success' },
+        { date: '12 April 2026', in: '09:15 AM', out: '06:05 PM', hrs: '8h 50m', status: 'Present', class: 'bg-success' },
+        { date: '11 April 2026', in: '--:--', out: '--:--', hrs: '0h 00m', status: 'Absent', class: 'bg-danger' },
+        { date: '10 April 2026', in: '09:00 AM', out: '06:00 PM', hrs: '9h 00m', status: 'Present', class: 'bg-success' }
+    ],
+    'March 2026': [
+        { date: '15 March 2026', in: '08:50 AM', out: '05:50 PM', hrs: '9h 00m', status: 'Present', class: 'bg-success' },
+        { date: '14 March 2026', in: '09:00 AM', out: '06:00 PM', hrs: '9h 00m', status: 'Present', class: 'bg-success' },
+        { date: '13 March 2026', in: '--:--', out: '--:--', hrs: '0h 00m', status: 'Absent', class: 'bg-danger' },
+        { date: '12 March 2026', in: '09:05 AM', out: '06:15 PM', hrs: '9h 10m', status: 'Present', class: 'bg-success' }
+    ],
+    'February 2026': [
+        { date: '28 February 2026', in: '09:00 AM', out: '06:00 PM', hrs: '9h 00m', status: 'Present', class: 'bg-success' },
+        { date: '27 February 2026', in: '--:--', out: '--:--', hrs: '0h 00m', status: 'Absent', class: 'bg-danger' },
+        { date: '26 February 2026', in: '09:10 AM', out: '06:10 PM', hrs: '9h 00m', status: 'Present', class: 'bg-success' },
+        { date: '25 February 2026', in: '08:50 AM', out: '05:40 PM', hrs: '8h 50m', status: 'Present', class: 'bg-success' }
+    ],
+    'January 2026': [
+        { date: '15 January 2026', in: '09:00 AM', out: '06:00 PM', hrs: '9h 00m', status: 'Present', class: 'bg-success' },
+        { date: '14 January 2026', in: '09:00 AM', out: '06:00 PM', hrs: '9h 00m', status: 'Present', class: 'bg-success' },
+        { date: '13 January 2026', in: '09:00 AM', out: '06:00 PM', hrs: '9h 00m', status: 'Present', class: 'bg-success' }
+    ],
+    'December 2025': [
+        { date: '15 December 2025', in: '09:00 AM', out: '06:00 PM', hrs: '9h 00m', status: 'Present', class: 'bg-success' },
+        { date: '14 December 2025', in: '09:00 AM', out: '06:00 PM', hrs: '9h 00m', status: 'Present', class: 'bg-success' },
+        { date: '13 December 2025', in: '--:--', out: '--:--', hrs: '0h 00m', status: 'Absent', class: 'bg-danger' }
+    ]
+};
+
+function updateEmployeeAttendance() {
+    const select = document.getElementById('attendanceMonthSelectEmp');
+    const tbody = document.getElementById('attendanceTableBodyEmp');
+    if (!select || !tbody) return;
+
+    const selectedMonth = select.value;
+    const data = staticAttendanceData[selectedMonth] || staticAttendanceData['April 2026'];
+    
+    tbody.innerHTML = '';
+    data.forEach(row => {
+        tbody.innerHTML += `<tr><td>${row.date}</td><td>${row.in}</td><td>${row.out}</td><td>${row.hrs}</td><td><span class="badge ${row.class}">${row.status}</span></td></tr>`;
+    });
+}
