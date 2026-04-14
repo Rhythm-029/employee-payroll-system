@@ -1,118 +1,217 @@
+/**
+ * Core business logic for Admin and Employee dashboards.
+ * Fetches real-time data from Spring Boot REST endpoints.
+ */
+
+let currentEmployees = []; // Global store for the current list (Real data from DB)
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Populate user names from localStorage
-    const userName = localStorage.getItem('userName') || 'Admin User';
+    const userId = localStorage.getItem('userId');
+    const role = localStorage.getItem('userRole');
+    const userName = localStorage.getItem('userName');
+
+    // Set Welcome Name
     const adminNameElem = document.getElementById('adminName');
     const empNameElem = document.getElementById('empName');
-    
     if (adminNameElem) adminNameElem.textContent = userName;
     if (empNameElem) empNameElem.textContent = `Welcome, ${userName}`;
 
-    // Initialize Dashboard data if on Admin page
+    // Load dynamic data based on page/role
     if (document.getElementById('employeesTableBody')) {
-        initializeData();
+        loadEmployeesTable(); // Admin view
+        updateAdminStats(); // Real-time stats
+    } else if (document.getElementById('empProfileSection')) {
+        loadEmployeeProfile(userId); // Employee view
     }
 });
 
 /**
- * Initialize data from API or Mock Fallback
+ * ADMIN: Fetch and update statistical summary
  */
-async function initializeData() {
+async function updateAdminStats() {
+    try {
+        const response = await fetch('/api/management/summary');
+        const stats = await response.json();
+        const totalCountElem = document.getElementById('totalEmployeesCount');
+        const totalBudgetElem = document.getElementById('totalPayrollBudget');
+        
+        if (totalCountElem) totalCountElem.textContent = stats.total || 0;
+        if (totalBudgetElem) totalBudgetElem.textContent = `₹ ${(stats.total_budget || 0).toLocaleString('en-IN')}`;
+    } catch (error) {
+        console.error('Failed to fetch summary:', error);
+    }
+}
+
+/**
+ * ADMIN: Load all employees from database
+ */
+async function loadEmployeesTable() {
     try {
         const response = await fetch('/api/management/employees');
         if (response.ok) {
-            const liveEmployees = await response.json();
-            if (liveEmployees && liveEmployees.length > 0) {
-                console.log('Loading live employee data...');
-                renderEmployees(liveEmployees);
-                renderRecentPayrollActivities(liveEmployees);
-                if(typeof generateMockAttendance === 'function') generateMockAttendance();
-                return;
-            }
+            currentEmployees = await response.json();
+            renderEmployees(currentEmployees);
+            renderRecentPayrollActivities(currentEmployees);
+            updateAdminStats();
+            if (typeof generateMockAttendance === 'function') generateMockAttendance();
         }
-    } catch (err) {
-        console.warn('Backend API not reachable. Falling back to local mock data.', err);
+    } catch (error) {
+        console.error('Failed to load employees:', error);
     }
-    
-    // Fallback to local mock data
-    renderEmployees(mockEmployees);
-    renderRecentPayrollActivities(mockEmployees);
-    if(typeof generateMockAttendance === 'function') generateMockAttendance();
 }
 
-// Mock Data for 42 Indian Employees
-const mockEmployees = [
-    { id: 'PAY-101', name: 'Rhythm Singhal', role: 'EMPLOYEE', designation: 'Senior Developer', type: 'FullTime', salary: 85000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-102', name: 'Yashwardhan Singh', role: 'ADMIN', designation: 'Project Manager', type: 'FullTime', salary: 95000, status: 'Active', shift: '10:00 - 19:00' },
-    { id: 'PAY-103', name: 'Prathamesh Bhandare', role: 'EMPLOYEE', designation: 'Tech Lead', type: 'FullTime', salary: 90000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-104', name: 'Anshika Gupta', role: 'EMPLOYEE', designation: 'Accountant', type: 'FullTime', salary: 65000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-105', name: 'Soha Patel', role: 'EMPLOYEE', designation: 'HR Specialist', type: 'FullTime', salary: 60000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-106', name: 'Hetanshi Vora', role: 'EMPLOYEE', designation: 'Data Analyst', type: 'PartTime', salary: 45000, status: 'Active', shift: '14:00 - 19:00' },
-    { id: 'PAY-107', name: 'Tanishka Shukla', role: 'EMPLOYEE', designation: 'UX Designer', type: 'FullTime', salary: 75000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-108', name: 'Aarav Sharma', role: 'EMPLOYEE', designation: 'System Admin', type: 'FullTime', salary: 70000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-109', name: 'Vihaan Verma', role: 'EMPLOYEE', designation: 'Junior Developer', type: 'FullTime', salary: 45000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-110', name: 'Aditya Rao', role: 'EMPLOYEE', designation: 'Marketing Lead', type: 'FullTime', salary: 80000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-111', name: 'Arjun Nair', role: 'EMPLOYEE', designation: 'Operations', type: 'FullTime', salary: 55000, status: 'Active', shift: '08:00 - 17:00' },
-    { id: 'PAY-112', name: 'Sai Reddy', role: 'EMPLOYEE', designation: 'Database Admin', type: 'FullTime', salary: 78000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-113', name: 'Ishan Malhotra', role: 'EMPLOYEE', designation: 'DevOps', type: 'FullTime', salary: 88000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-114', name: 'Krishna Iyer', role: 'EMPLOYEE', designation: 'Senior Engineer', type: 'FullTime', salary: 92000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-115', name: 'Aryan Dubey', role: 'EMPLOYEE', designation: 'QA Lead', type: 'FullTime', salary: 72000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-116', name: 'Shaurya Pratap', role: 'EMPLOYEE', designation: 'Security Analyst', type: 'FullTime', salary: 84000, status: 'Active', shift: '22:00 - 06:00' },
-    { id: 'PAY-117', name: 'Kabir Kapoor', role: 'EMPLOYEE', designation: 'Product Manager', type: 'FullTime', salary: 110000, status: 'Active', shift: '10:00 - 19:00' },
-    { id: 'PAY-118', name: 'Atharv Kulkarni', role: 'EMPLOYEE', designation: 'Frontend Dev', type: 'FullTime', salary: 68000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-119', name: 'Reyansh Joshi', role: 'EMPLOYEE', designation: 'Backend Dev', type: 'FullTime', salary: 74000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-120', name: 'Advait Deshmukh', role: 'EMPLOYEE', designation: 'Cloud Architect', type: 'FullTime', salary: 125000, status: 'Active', shift: '08:00 - 17:00' },
-    { id: 'PAY-121', name: 'Ananya Pandey', role: 'EMPLOYEE', designation: 'HR Executive', type: 'FullTime', salary: 52000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-122', name: 'Diya Mukherjee', role: 'EMPLOYEE', designation: 'Financial Analyst', type: 'FullTime', salary: 67000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-123', name: 'Myra Khan', role: 'EMPLOYEE', designation: 'Content Strategist', type: 'FullTime', salary: 58000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-124', name: 'Shanaya Kapoor', role: 'EMPLOYEE', designation: 'Social Media', type: 'FullTime', salary: 48000, status: 'Active', shift: '10:00 - 19:00' },
-    { id: 'PAY-125', name: 'Sia Goel', role: 'EMPLOYEE', designation: 'Legal Counsel', type: 'FullTime', salary: 115000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-126', name: 'Vanya Sethi', role: 'EMPLOYEE', designation: 'PR Lead', type: 'FullTime', salary: 72000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-127', name: 'Zoya Mirza', role: 'EMPLOYEE', designation: 'Copywriter', type: 'FullTime', salary: 42000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-128', name: 'Aarush Gill', role: 'EMPLOYEE', designation: 'Mobile Developer', type: 'FullTime', salary: 76000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-129', name: 'Vivaan Das', role: 'EMPLOYEE', designation: 'AI Engineer', type: 'FullTime', salary: 135000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-130', name: 'Prisha Roy', role: 'EMPLOYEE', designation: 'Business Analyst', type: 'FullTime', salary: 69000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-131', name: 'Navya Bhat', role: 'EMPLOYEE', designation: 'Office Manager', type: 'FullTime', salary: 45000, status: 'Active', shift: '08:00 - 17:00' },
-    { id: 'PAY-132', name: 'Saanvi Chawla', role: 'EMPLOYEE', designation: 'Receptionist', type: 'FullTime', salary: 32000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-133', name: 'Advik Saxena', role: 'EMPLOYEE', designation: 'Support Engineer', type: 'FullTime', salary: 40000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-134', name: 'Ayaan Sheikh', role: 'EMPLOYEE', designation: 'Network Admin', type: 'FullTime', salary: 62000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-135', name: 'Hridaan Bose', role: 'EMPLOYEE', designation: 'Graphic Designer', type: 'FullTime', salary: 51000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-136', name: 'Kyra Oberoi', role: 'EMPLOYEE', designation: 'Event Planner', type: 'FullTime', salary: 59000, status: 'Active', shift: '10:00 - 19:00' },
-    { id: 'PAY-137', name: 'Nyra Singhania', role: 'EMPLOYEE', designation: 'Internal Auditor', type: 'FullTime', salary: 81000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-138', name: 'Ruhi Bajaj', role: 'EMPLOYEE', designation: 'Recruiter', type: 'FullTime', salary: 55000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-139', name: 'Sara Ali', role: 'EMPLOYEE', designation: 'Training Lead', type: 'FullTime', salary: 73000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-140', name: 'Tara Dsouza', role: 'EMPLOYEE', designation: 'Facility Manager', type: 'FullTime', salary: 47000, status: 'Active', shift: '07:00 - 16:00' },
-    { id: 'PAY-141', name: 'Zara Khurana', role: 'EMPLOYEE', designation: 'Procurement', type: 'FullTime', salary: 61000, status: 'Active', shift: '09:00 - 18:00' },
-    { id: 'PAY-142', name: 'Kavya Menon', role: 'EMPLOYEE', designation: 'Compliance Officer', type: 'FullTime', salary: 77000, status: 'Active', shift: '09:00 - 18:00' }
-];
+/**
+ * EMPLOYEE: Load specific user data for dashboard
+ */
+async function loadEmployeeProfile(userId) {
+    try {
+        console.log('Loading profile for User ID:', userId);
+        const response = await fetch(`/api/management/employees/profile/${userId}`);
+        const emp = await response.json();
+        
+        if (!emp) {
+            console.error('No employee data found for ID:', userId);
+            return;
+        }
+
+        // Update Nav/Header
+        const profileImg = document.getElementById('empProfileImg');
+        const customImgUrl = `/api/management/employees/profile-image/${userId}`;
+        
+        // Try loading custom image if it exists, else fallback to avatars
+        if (profileImg) {
+            profileImg.src = customImgUrl + '?t=' + new Date().getTime(); // Anti-cache
+            profileImg.onerror = () => {
+                profileImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=3498db&color=fff`;
+            };
+        }
+
+        // Dashboard/Profile Page Display
+        const mainDisplay = document.getElementById('mainProfileDisplay');
+        if (mainDisplay) {
+            mainDisplay.src = customImgUrl + '?t=' + new Date().getTime();
+            mainDisplay.onerror = () => {
+                mainDisplay.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=3498db&color=fff`;
+            };
+        }
+
+        // Restore Profile Info
+        const lastSalaryElem = document.getElementById('lastSalary');
+        const leavesLeftElem = document.getElementById('leavesLeft');
+        if (lastSalaryElem) lastSalaryElem.textContent = `₹ ${(emp.baseSalary || 0).toLocaleString('en-IN')}`;
+        if (leavesLeftElem) leavesLeftElem.textContent = emp.leavesTaken || 0;
+        
+        const profileNameElem = document.getElementById('profileName');
+        const profileEmpIdElem = document.getElementById('profileEmpId');
+        const profileEmailElem = document.getElementById('profileEmail');
+        const profileShiftElem = document.getElementById('profileShift');
+        
+        if (profileNameElem) profileNameElem.textContent = emp.name;
+        if (profileEmpIdElem) profileEmpIdElem.textContent = `PAY-${emp.id}`;
+        if (profileEmailElem) profileEmailElem.textContent = emp.email;
+        if (profileShiftElem) profileShiftElem.textContent = emp.shiftTime || '09:00 AM - 06:00 PM';
+        
+        const phoneElem = document.getElementById('profilePhone');
+        const addressElem = document.getElementById('profileAddress');
+        if (phoneElem) phoneElem.textContent = emp.phone || '+91 XXXXX XXXXX';
+        if (addressElem) addressElem.textContent = emp.address || 'Not Provided';
+        
+        // Update Salary Breakdown
+        const bBase = document.getElementById('breakdownBase');
+        const bBonus = document.getElementById('breakdownBonus');
+        const bTax = document.getElementById('breakdownTax');
+        const netSal = document.getElementById('netSalary');
+
+        if (bBase) bBase.textContent = `₹ ${(emp.baseSalary || 0).toLocaleString('en-IN')}`;
+        if (bBonus) bBonus.textContent = `₹ ${(emp.bonus || 0).toLocaleString('en-IN')}`;
+        
+        const taxAmount = ((emp.baseSalary || 0) + (emp.bonus || 0)) * ((emp.taxPercentage || 10) / 100);
+        if (bTax) bTax.textContent = `- ₹ ${taxAmount.toLocaleString('en-IN')}`;
+        
+        if (netSal) netSal.textContent = `₹ ${((emp.baseSalary || 0) + (emp.bonus || 0) - taxAmount).toLocaleString('en-IN')}`;
+
+        const downloadBtn = document.getElementById('downloadSlipBtn');
+        if (downloadBtn) downloadBtn.onclick = () => downloadRealSlip(emp.id);
+
+    } catch (error) {
+        console.error('Profile loading error:', error);
+    }
+}
+
+/**
+ * Edit Personal Profile (Employee Only)
+ */
+async function updateProfile() {
+    const userId = localStorage.getItem('userId');
+    const name = document.getElementById('profileName').textContent;
+    const phone = document.getElementById('profilePhone').textContent;
+    const address = document.getElementById('profileAddress').textContent;
+    const currentImg = document.querySelector('#profile img').src;
+
+    const { value: formValues } = await Swal.fire({
+        title: 'Edit Personal Profile',
+        html:
+            `<input id="edit-name" class="swal2-input" placeholder="Full Name" value="${name}">` +
+            `<input id="edit-phone" class="swal2-input" placeholder="Phone Number" value="${phone}">` +
+            `<textarea id="edit-address" class="swal2-textarea" placeholder="Address">${address}</textarea>` +
+            `<input id="edit-pic" class="swal2-input" placeholder="Profile Picture URL" value="${currentImg}">`,
+        focusConfirm: false,
+        preConfirm: () => {
+            return {
+                userId: userId,
+                name: document.getElementById('edit-name').value,
+                phone: document.getElementById('edit-phone').value,
+                address: document.getElementById('edit-address').value,
+                profilePicture: document.getElementById('edit-pic').value
+            }
+        }
+    });
+
+    if (formValues) {
+        try {
+            const response = await fetch('/api/management/employees/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formValues)
+            });
+            if (response.ok) {
+                showToast('Success', 'Profile updated successfully!', 'success');
+                localStorage.setItem('userName', formValues.name);
+                location.reload();
+            }
+        } catch (error) {
+            showToast('Error', 'Update failed.', 'error');
+        }
+    }
+}
 
 /**
  * Render workers table in Admin Portal
  */
-function renderEmployees(dataList) {
+function renderEmployees(employees) {
     const tableBody = document.getElementById('employeesTableBody');
     if (!tableBody) return;
 
-    const listToRender = dataList || mockEmployees;
     tableBody.innerHTML = '';
-    
-    listToRender.forEach(emp => {
+    employees.forEach((emp, index) => {
+        const badgeClass = emp.status === 'ACTIVE' ? 'bg-success' : 'bg-danger';
         const row = `
             <tr>
-                <td>${emp.id}</td>
+                <td>PAY-${emp.id}</td>
                 <td>
                     <div class="d-flex align-items-center">
                         <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=random" class="rounded-circle me-2" width="30">
                         ${emp.name}
                     </div>
                 </td>
-                <td><span class="badge bg-secondary-subtle text-secondary small">${emp.role || 'EMPLOYEE'}</span></td>
-                <td>${emp.designation || 'Staff'}</td>
-                <td><span class="badge bg-success">${emp.status || 'Active'}</span></td>
+                <td><span class="badge bg-secondary-subtle text-secondary small">EMPLOYEE</span></td>
+                <td>${emp.email}</td>
+                <td><span class="badge ${badgeClass}">${emp.status}</span></td>
                 <td>
-                    <button class="btn btn-sm btn-outline-info me-1" onclick="viewEmployeeDetails('${emp.id}')">
+                    <button class="btn btn-sm btn-outline-info me-1" onclick="viewEmployeeDetailsByIndex(${index})">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteEmployee('${emp.id}')">
+                    <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteEmployee(${emp.id})">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -122,264 +221,183 @@ function renderEmployees(dataList) {
     });
 }
 
-/**
- * Open employee details Modal
- */
-function viewEmployeeDetails(id) {
-    const emp = mockEmployees.find(e => e.id === id);
-    if (!emp) return;
-    
-    document.getElementById('modalEmpName').textContent = emp.name;
-    document.getElementById('modalEmpId').textContent = emp.id;
-    document.getElementById('modalEmpDesignation').textContent = emp.designation;
-    document.getElementById('modalEmpSalary').textContent = `₹ ${emp.salary.toLocaleString('en-IN')}`;
-    document.getElementById('modalEmpShift').textContent = emp.shift;
-    
-    // Manage Suspend Button State
-    const actionBtn = document.getElementById('suspendActionBtn');
-    if (actionBtn) {
-        actionBtn.setAttribute('onclick', `suspendEmployee('${emp.id}')`);
-        actionBtn.textContent = (emp.status === 'Suspended') ? 'Reactivate Account' : 'Suspend Account';
-        actionBtn.className = (emp.status === 'Suspended') ? 'btn btn-outline-success w-100 mb-2' : 'btn btn-outline-danger w-100 mb-2';
-    }
-
-    const myModal = new bootstrap.Modal(document.getElementById('employeeDetailsModal'));
-    myModal.show();
+function viewEmployeeDetailsByIndex(index) {
+    viewEmployeeDetails(currentEmployees[index]);
 }
 
 /**
- * SIMULATION: Suspend/Reactivate Employee
+ * ADMIN: Add Employee (Real Database Insertion)
  */
-function suspendEmployee(id) {
-    const emp = mockEmployees.find(e => e.id === id);
-    if (!emp) return;
-
-    if (emp.status === 'Active') {
-        emp.status = 'Suspended';
-        showToast('Account Suspended', `Account for ${emp.name} has been restricted.`, 'error');
-    } else {
-        emp.status = 'Active';
-        showToast('Account Reactivated', `${emp.name} is now back to Active status.`, 'success');
-    }
-
-    renderEmployees(); // Refresh table
-    
-    // Close modal
-    const modalInstance = bootstrap.Modal.getInstance(document.getElementById('employeeDetailsModal'));
-    if (modalInstance) modalInstance.hide();
-}
-
-/**
- * SIMULATION: Add Employee
- */
-function simulateAddEmployee() {
-    Swal.fire({
+async function simulateAddEmployee() {
+    const { value: formValues } = await Swal.fire({
         title: 'Add New Employee',
-        html: `
-            <input id="swal-name" class="swal2-input" placeholder="Full Name">
-            <input id="swal-role" class="swal2-input" placeholder="Designation (e.g. Senior Dev)">
-            <input id="swal-salary" class="swal2-input" placeholder="Salary (Base)">
-        `,
+        html:
+            '<input id="swal-name" class="swal2-input" placeholder="Full Name">' +
+            '<input id="swal-email" class="swal2-input" placeholder="Email Address">' +
+            '<input id="swal-salary" class="swal2-input" placeholder="Base Salary">' +
+            '<input id="swal-pass" type="password" class="swal2-input" placeholder="Initial Password">',
         focusConfirm: false,
         preConfirm: () => {
             return {
                 name: document.getElementById('swal-name').value,
-                role: document.getElementById('swal-role').value,
-                salary: document.getElementById('swal-salary').value
+                email: document.getElementById('swal-email').value,
+                salary: document.getElementById('swal-salary').value,
+                password: document.getElementById('swal-pass').value
             }
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const newEmp = {
-                id: `PAY-${143 + mockEmployees.length}`,
-                name: result.value.name,
-                designation: result.value.role,
-                role: 'EMPLOYEE',
-                salary: parseInt(result.value.salary) || 50000,
-                status: 'Active',
-                shift: '09:00 - 18:00'
-            };
-            mockEmployees.unshift(newEmp); // Add to top
-            renderEmployees();
-            showToast('Employee Added', `${newEmp.name} has been onboarded successfully.`, 'success');
-        }
     });
-}
 
-/**
- * SIMULATION: Payroll Release
- */
-function simulatePayrollRelease() {
-    Swal.fire({
-        title: 'Disburse Payroll?',
-        text: "You are about to release ₹ 28.5L for April 2026 cycle.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#4f46e5',
-        confirmButtonText: 'Yes, Release Now'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            let timerInterval;
-            Swal.fire({
-                title: 'Processing Transfers...',
-                html: 'Bank communication established. <b></b> milliseconds remaining.',
-                timer: 2000,
-                timerProgressBar: true,
-                didOpen: () => {
-                    Swal.showLoading();
-                    const b = Swal.getHtmlContainer().querySelector('b');
-                    timerInterval = setInterval(() => {
-                        b.textContent = Swal.getTimerLeft();
-                    }, 100);
-                },
-                willClose: () => clearInterval(timerInterval)
-            }).then(() => {
-                showToast('Success', 'Payroll has been disbursed to all employees.', 'success');
+    if (formValues) {
+        try {
+            const response = await fetch('/api/management/employees', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formValues)
             });
-        }
-    });
-}
-
-/**
- * SIMULATION: Reports & Data
- */
-function viewSpendingBreakdown() {
-    Swal.fire({
-        title: 'Department Spending Breakdown',
-        html: `
-            <div class="text-start mt-3">
-                <p>Engineering: <b>₹ 18.2L (62%)</b></p>
-                <div class="progress mb-3"><div class="progress-bar" style="width: 62%"></div></div>
-                <p>Human Resources: <b>₹ 4.1L (14%)</b></p>
-                <div class="progress mb-3"><div class="progress-bar bg-info" style="width: 14%"></div></div>
-                <p>Operations: <b>₹ 6.2L (24%)</b></p>
-                <div class="progress"><div class="progress-bar bg-success" style="width: 24%"></div></div>
-            </div>
-        `,
-        confirmButtonText: 'Close'
-    });
-}
-
-function downloadReport(name) {
-    showToast('Download Started', `Preparing ${name} and generating unique PDF index...`, 'info');
-    setTimeout(() => {
-        showToast('Download Complete', `${name} is ready.`, 'success');
-    }, 1500);
-}
-
-/**
- * Helper: Show Toast notification
- */
-function showToast(title, text, icon) {
-    Swal.fire({
-        title: title,
-        text: text,
-        icon: icon,
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true
-    });
-}
-
-/**
- * Employee Specific: Update Profile
- */
-function updateProfile() {
-    const userEmail = localStorage.getItem('userEmail');
-    if (!userEmail) {
-        showToast('Profile Update', 'Please log in again to update your password.', 'info');
-        return;
-    }
-
-    const currentPassword = prompt('Enter your current password to update your profile settings:');
-    if (!currentPassword) return;
-
-    const newPassword = prompt('Enter your new password:');
-    if (!newPassword) return;
-
-    const confirmPassword = prompt('Confirm your new password:');
-    if (newPassword !== confirmPassword) {
-        showToast('Update Failed', 'The passwords did not match. Please try again.', 'error');
-        return;
-    }
-
-    const updateMessageElem = document.getElementById('profileUpdateMessage');
-    if (updateMessageElem) {
-        updateMessageElem.classList.add('d-none');
-        updateMessageElem.textContent = '';
-    }
-
-    fetch('/api/auth/update-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userEmail, oldPassword: currentPassword.trim(), newPassword: newPassword.trim() })
-    })
-    .then((res) => res.json())
-    .then((data) => {
-        if (data.status === 'success') {
-            showToast('Password Updated', data.message || 'Your password has been updated.', 'success');
-            if (updateMessageElem) {
-                updateMessageElem.textContent = data.message || 'Your password has been updated successfully.';
-                updateMessageElem.classList.remove('d-none');
+            const result = await response.json();
+            if (result.status === 'success') {
+                showToast('Success', 'Employee added and user account created!', 'success');
+                loadEmployeesTable();
             }
-        } else {
-            showToast('Update Failed', data.message || 'Unable to update your password.', 'error');
+        } catch (error) {
+            showToast('Error', 'Failed to add employee.', 'error');
         }
-    })
-    .catch(() => {
-        showToast('Update Failed', 'Unable to update password at this time.', 'error');
-    });
-}
-
-/**
- * Switch dashboard sections
- */
-function showSection(sectionId) {
-    const sections = document.querySelectorAll('#contentSections section');
-    const sidebarLinks = document.querySelectorAll('.sidebar-link');
-
-    sections.forEach(sec => {
-        sec.classList.add('d-none');
-        sec.classList.remove('animated');
-    });
-
-    const targetSection = document.getElementById(sectionId);
-    if (targetSection) {
-        targetSection.classList.remove('d-none');
-        setTimeout(() => targetSection.classList.add('animated'), 10);
     }
-
-    sidebarLinks.forEach(link => {
-        link.classList.remove('active');
-        const onclickAttr = link.getAttribute('onclick');
-        if (onclickAttr && onclickAttr.includes(`'${sectionId}'`)) {
-            link.classList.add('active');
-        }
-    });
 }
 
 /**
- * Filter Employees for the search bar
+ * ADMIN: Update salary details
+ */
+async function updateAdminSalary(empId) {
+    const emp = currentEmployees.find(e => e.id === empId);
+    const { value: form } = await Swal.fire({
+        title: 'Update Employee Structure',
+        html:
+            `<label class="swal2-label">Base Salary</label><input id="swal-base" class="swal2-input" value="${emp.baseSalary}">` +
+            `<label class="swal2-label">Bonus</label><input id="swal-bonus" class="swal2-input" value="${emp.bonus}">` +
+            `<label class="swal2-label">Tax %</label><input id="swal-tax" class="swal2-input" value="${emp.taxPercentage}">` +
+            `<label class="swal2-label">Dept</label><input id="swal-dept" class="swal2-input" value="${emp.department}">` +
+            `<label class="swal2-label">Desig</label><input id="swal-desig" class="swal2-input" value="${emp.designation}">`,
+        preConfirm: () => {
+            return {
+                baseSalary: document.getElementById('swal-base').value,
+                bonus: document.getElementById('swal-bonus').value,
+                taxPercentage: document.getElementById('swal-tax').value,
+                department: document.getElementById('swal-dept').value,
+                designation: document.getElementById('swal-desig').value
+            }
+        }
+    });
+
+    if (form) {
+        try {
+            await fetch(`/api/management/employees/${empId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form)
+            });
+            showToast('Success', 'Profile updated in database!', 'success');
+            loadEmployeesTable();
+        } catch (error) {
+            showToast('Error', 'Update failed.', 'error');
+        }
+    }
+}
+async function handleImageUpload(input) {
+    if (!input.files || !input.files[0]) return;
+    const userId = localStorage.getItem('userId');
+    const formData = new FormData();
+    formData.append('userId', userId);
+    formData.append('file', input.files[0]);
+
+    showToast('Uploading', 'Saving image to backup...', 'info');
+    try {
+        const response = await fetch('/api/management/employees/upload-image', {
+            method: 'POST',
+            body: formData
+        });
+        if (response.ok) {
+            showToast('Success', 'Profile picture updated!', 'success');
+            setTimeout(() => location.reload(), 1500);
+        }
+    } catch (error) {
+        showToast('Error', 'Upload failed.', 'error');
+    }
+}
+function exportEmployeeList() {
+    window.location.href = '/api/management/employees/export';
+}
+
+/**
+ * ADMIN: Suspend/Reactivate user
+ */
+async function toggleUserStatus(userId, currentStatus) {
+    const newStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+    try {
+        await fetch(`/api/management/employees/status/${userId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+        });
+        showToast('Updated', `Account is now ${newStatus}`, 'info');
+        loadEmployeesTable();
+        bootstrap.Modal.getInstance(document.getElementById('employeeDetailsModal')).hide();
+    } catch (error) {
+        showToast('Error', 'Status update failed.', 'error');
+    }
+}
+
+/**
+ * PDF: Download Salary Slip
+ */
+function downloadRealSlip(empId) {
+    showToast('Processing', 'Generating PDF from real-time data...', 'info');
+    window.location.href = `/api/management/payroll/${empId}/slip`;
+}
+
+/**
+ * UI Helpers
+ */
+function viewEmployeeDetails(emp) {
+    document.getElementById('modalEmpName').textContent = emp.name;
+    document.getElementById('modalEmpId').textContent = `PAY-${emp.id}`;
+    document.getElementById('modalEmpSalary').textContent = `₹ ${emp.baseSalary.toLocaleString('en-IN')}`;
+    
+    const suspendBtn = document.getElementById('suspendActionBtn');
+    suspendBtn.textContent = emp.status === 'ACTIVE' ? 'Suspend Account' : 'Reactivate Account';
+    suspendBtn.className = emp.status === 'ACTIVE' ? 'btn btn-outline-danger w-100 mb-2' : 'btn btn-outline-success w-100 mb-2';
+    suspendBtn.onclick = () => toggleUserStatus(emp.userId, emp.status);
+
+    const updateBtn = document.getElementById('updateSalaryBtn');
+    updateBtn.onclick = () => updateAdminSalary(emp.id);
+
+    new bootstrap.Modal(document.getElementById('employeeDetailsModal')).show();
+}
+
+/**
+ * Filter Employees for the search bar (Rewired to real data)
  */
 function filterEmployees() {
     const input = document.getElementById('employeeSearchInput');
     if (!input) return;
     const filter = input.value.toLowerCase();
-    const filteredList = mockEmployees.filter(emp => emp.name.toLowerCase().includes(filter));
+    const filteredList = currentEmployees.filter(emp => 
+        emp.name.toLowerCase().includes(filter) || 
+        emp.email.toLowerCase().includes(filter) ||
+        `PAY-${emp.id}`.toLowerCase().includes(filter)
+    );
     renderEmployees(filteredList);
 }
 
 /**
- * Render Recent Payroll Activities (Top 10)
+ * Render Recent Payroll Activities (Rewired to real data)
  */
 function renderRecentPayrollActivities(dataList) {
     const payrollBody = document.getElementById('payrollActivitiesTableBody');
     if (!payrollBody) return;
     
     payrollBody.innerHTML = '';
-    const list = dataList || mockEmployees;
+    const list = dataList || currentEmployees;
     const top10 = list.slice(0, 10);
     
     top10.forEach(emp => {
@@ -387,7 +405,7 @@ function renderRecentPayrollActivities(dataList) {
             <tr>
                 <td><div class="d-flex align-items-center"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}&background=random" class="rounded-circle me-3" width="35"> ${emp.name}</div></td>
                 <td>Monthly Salary</td>
-                <td class="fw-bold">₹ ${emp.salary.toLocaleString('en-IN')}</td>
+                <td class="fw-bold">₹ ${emp.baseSalary.toLocaleString('en-IN')}</td>
                 <td><span class="badge rounded-pill bg-success-subtle text-success px-3">Processed</span></td>
             </tr>
         `;
@@ -396,31 +414,36 @@ function renderRecentPayrollActivities(dataList) {
 }
 
 /**
- * Confirm and Delete Employee
+ * Confirm and Delete Employee (Preserving UI improvement)
  */
 function confirmDeleteEmployee(id) {
     Swal.fire({
         title: 'Delete Employee?',
-        text: `Are you sure you want to completely remove account ${id}? This action cannot be undone.`,
+        text: `Are you sure you want to completely remove account PAY-${id}? This action cannot be undone.`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
         confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
+    }).then(async (result) => {
         if (result.isConfirmed) {
-            const index = mockEmployees.findIndex(e => e.id === id);
-            if (index !== -1) {
-                mockEmployees.splice(index, 1);
-                renderEmployees();
-                showToast('Deleted!', `Employee ${id} has been removed.`, 'success');
+            try {
+                const response = await fetch(`/api/management/employees/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showToast('Deleted!', `Employee record removed.`, 'success');
+                    loadEmployeesTable();
+                } else {
+                    showToast('Error', 'Deletion failed on server.', 'error');
+                }
+            } catch (error) {
+                showToast('Error', 'Cannot connect to server.', 'error');
             }
         }
     });
 }
 
 /**
- * Generate Mock Attendance for selected date
+ * Generate Mock Attendance for selected date (Rewired to real data)
  */
 function generateMockAttendance() {
     const tbody = document.getElementById('attendanceTableBody');
@@ -430,8 +453,7 @@ function generateMockAttendance() {
     const dateSelect = document.getElementById('attendanceDateSelect');
     const selectedSeed = dateSelect ? new Date(dateSelect.value).getDate() : 14;
     
-    mockEmployees.forEach((emp, index) => {
-        // pseudo-random logic to generate slight variations in time for realism based on selected date
+    currentEmployees.forEach((emp, index) => {
         const isLate = (selectedSeed + index) % 7 === 0;
         const isAbsent = (selectedSeed + index) % 19 === 0;
         
@@ -456,7 +478,7 @@ function generateMockAttendance() {
 }
 
 /**
- * View My Profile
+ * View My Profile (Preserving UI improvement)
  */
 function viewMyProfile(e) {
     if (e) e.preventDefault();
@@ -477,4 +499,19 @@ function viewMyProfile(e) {
         confirmButtonText: 'Close',
         confirmButtonColor: '#1a4f8a'
     });
+}
+
+function showToast(title, text, icon) {
+    Swal.fire({ title, text, icon, toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+}
+
+function showSection(sectionId) {
+    document.querySelectorAll('#contentSections section').forEach(sec => sec.classList.add('d-none'));
+    const target = document.getElementById(sectionId);
+    if (target) target.classList.remove('d-none');
+    
+    // Update active state in sidebar
+    document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+    const activeLink = document.querySelector(`.sidebar-link[onclick*="${sectionId}"]`);
+    if (activeLink) activeLink.classList.add('active');
 }
