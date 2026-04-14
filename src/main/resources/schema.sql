@@ -1,4 +1,7 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- Drop tables if they exist to allow clean re-runs
+DROP TABLE IF EXISTS password_reset_tokens;
 DROP TABLE IF EXISTS attendance;
 DROP TABLE IF EXISTS payroll;
 DROP TABLE IF EXISTS employees;

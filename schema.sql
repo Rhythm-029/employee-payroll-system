@@ -1,4 +1,7 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- Drop tables if they exist to allow clean re-runs
+DROP TABLE IF EXISTS password_reset_tokens;
 DROP TABLE IF EXISTS attendance;
 DROP TABLE IF EXISTS payroll;
 DROP TABLE IF EXISTS employees;
@@ -54,3 +57,5 @@ INSERT INTO users (name, email, password, role) VALUES
 -- Link users to employees (Rhythm Singhal is EMP-1)
 INSERT INTO employees (user_id, type, base_salary, bonus, tax_percentage, leaves_taken, shift_time) 
 VALUES (2, 'FullTime', 85000.0, 5000.0, 10.0, 2, '09:00 AM - 06:00 PM');
+
+SET FOREIGN_KEY_CHECKS = 1;
