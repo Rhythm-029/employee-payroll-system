@@ -192,9 +192,32 @@ function renderEmployees(employees) {
     const tableBody = document.getElementById('employeesTableBody');
     if (!tableBody) return;
 
+    const founderNames = ['Rhythm Singhal', 'Prathamesh Bhandare', 'Yashwardhan Singh'];
+    const rolesList = [
+        'Senior Director of Communication', 
+        'VP of Engineering', 
+        'Product Manager', 
+        'DevOps Engineer', 
+        'Lead Data Scientist', 
+        'HR Business Partner', 
+        'Financial Analyst',
+        'Marketing Strategist',
+        'UX/UI Lead',
+        'Full Stack Developer'
+    ];
+
     tableBody.innerHTML = '';
     employees.forEach((emp, index) => {
         const badgeClass = emp.status === 'ACTIVE' ? 'bg-success' : 'bg-danger';
+        
+        let displayRole = 'Software Engineer';
+        if (founderNames.includes(emp.name)) {
+            displayRole = 'Founder';
+        } else {
+            // Use deterministic random choice based on ID or index
+            displayRole = rolesList[(emp.id || index) % rolesList.length];
+        }
+
         const row = `
             <tr>
                 <td>PAY-${emp.id}</td>
@@ -204,7 +227,7 @@ function renderEmployees(employees) {
                         ${emp.name}
                     </div>
                 </td>
-                <td><span class="badge bg-secondary-subtle text-secondary small">EMPLOYEE</span></td>
+                <td><span class="badge bg-secondary-subtle text-secondary small">${displayRole}</span></td>
                 <td>${emp.email}</td>
                 <td><span class="badge ${badgeClass}">${emp.status}</span></td>
                 <td>
@@ -273,13 +296,13 @@ async function updateAdminSalary(empId) {
     const { value: form } = await Swal.fire({
         title: 'Update Employee Structure',
         html:
-            `<label class="swal2-label">Base Salary</label><input id="swal-base" class="swal2-input" value="${emp.baseSalary}">` +
-            `<label class="swal2-label">Bonus</label><input id="swal-bonus" class="swal2-input" value="${emp.bonus}">` +
-            `<label class="swal2-label">Tax %</label><input id="swal-tax" class="swal2-input" value="${emp.taxPercentage}">` +
-            `<label class="swal2-label">Dept</label><input id="swal-dept" class="swal2-input" value="${emp.department}">` +
-            `<label class="swal2-label">Desig</label><input id="swal-desig" class="swal2-input" value="${emp.designation}">`,
+            `<div class="mb-3 text-start"><label class="form-label">Base Salary (₹)</label><input type="text" id="swal-base" class="form-control" value="${emp.baseSalary}"></div>` +
+            `<div class="mb-3 text-start"><label class="form-label">Bonus/Allowances (₹)</label><input type="text" id="swal-bonus" class="form-control" value="${emp.bonus}"></div>` +
+            `<div class="mb-3 text-start"><label class="form-label">Tax Deduction (%)</label><input type="text" id="swal-tax" class="form-control" value="${emp.taxPercentage}"></div>` +
+            `<div class="mb-3 text-start"><label class="form-label">Department</label><input type="text" id="swal-dept" class="form-control" value="${emp.department}"></div>` +
+            `<div class="mb-3 text-start"><label class="form-label">Designation</label><input type="text" id="swal-desig" class="form-control" value="${emp.designation}"></div>`,
         preConfirm: () => {
-            return {
+			return {
                 baseSalary: document.getElementById('swal-base').value,
                 bonus: document.getElementById('swal-bonus').value,
                 taxPercentage: document.getElementById('swal-tax').value,
@@ -514,6 +537,20 @@ function showSection(sectionId) {
     document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
     const activeLink = document.querySelector(`.sidebar-link[onclick*="${sectionId}"]`);
     if (activeLink) activeLink.classList.add('active');
+}
+
+async function updateGlobalTax() {
+    const { value: newTax } = await Swal.fire({
+        title: 'Update Global Tax Deduction Rate',
+        input: 'text',
+        inputLabel: 'Enter new tax range (e.g. 12% - 22%)',
+        inputValue: document.getElementById('globalTaxRate').textContent,
+        showCancelButton: true
+    });
+    if (newTax) {
+        document.getElementById('globalTaxRate').textContent = newTax;
+        showToast('Success', 'Tax rules updated successfully.', 'success');
+    }
 }
 
 const staticAttendanceData = {

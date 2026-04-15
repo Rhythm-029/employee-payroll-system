@@ -34,9 +34,7 @@
             <a href="#" class="sidebar-link" onclick="showSection('attendance')">
                 <i class="fas fa-calendar-check"></i> <span>Attendance</span>
             </a>
-            <a href="#" class="sidebar-link" onclick="showSection('reports')">
-                <i class="fas fa-chart-line"></i> <span>Reports</span>
-            </a>
+
             <hr class="mx-3 text-white-50">
             <a href="#" class="sidebar-link text-warning" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
@@ -167,7 +165,7 @@
                                     <th>Emp ID</th>
                                     <th>Full Name</th>
                                     <th>Role</th>
-                                    <th>Designation</th>
+                                    <th>Mail</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
@@ -191,8 +189,8 @@
                         <div class="col-md-4">
                             <div class="p-4 bg-light rounded-4 text-center">
                                 <h6 class="text-secondary small fw-bold">TAX DEDUCTION RATE</h6>
-                                <h3 class="fw-bold text-primary">10% - 20%</h3>
-                                <button class="btn btn-sm btn-outline-primary mt-2" onclick="showToast('Success', 'Tax rules updated.', 'success')">Update Rules</button>
+                                <h3 class="fw-bold text-primary" id="globalTaxRate">10% - 20%</h3>
+                                <button class="btn btn-sm btn-outline-primary mt-2" onclick="updateGlobalTax()">Update Rules</button>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -235,28 +233,7 @@
                 </div>
             </section>
 
-            <!-- Reports Section -->
-            <section id="reports" class="d-none animated">
-                <div class="card border-0 shadow-sm p-4">
-                    <h5 class="fw-bold mb-4">Financial Reports</h5>
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="card border border-light shadow-sm p-4 h-100">
-                                <h6 class="fw-bold mb-3"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i> Budget Forecast</h6>
-                                <p class="text-secondary small">Projected salary expense for Q2: <strong>₹ 85.5 Lakhs</strong></p>
-                                <button class="btn btn-primary-custom w-100 mt-auto" onclick="downloadReport('Budget Forecast Q2')">Download PDF</button>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card border border-light shadow-sm p-4 h-100">
-                                <h6 class="fw-bold mb-3"><i class="fas fa-chart-pie me-2 text-info"></i> Department Spending</h6>
-                                <p class="text-secondary small">Engineering consumes <strong>62%</strong> of the total payroll budget.</p>
-                                <button class="btn btn-outline-primary w-100 mt-auto" onclick="viewSpendingBreakdown()">View Breakdown</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+
         </div>
     </div>
 
