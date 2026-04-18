@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +14,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
     <!-- Sidebar -->
@@ -52,14 +54,21 @@
             </div>
             <div class="d-flex align-items-center gap-4">
                 <div class="dropdown">
-                    <div class="d-flex align-items-center cursor-pointer" id="profileDropdown" data-bs-toggle="dropdown">
-                        <img id="adminProfileImg" src="https://ui-avatars.com/api/?name=Admin&background=1a4f8a&color=fff" class="rounded-circle shadow-sm" width="45" height="45">
+                    <div class="d-flex align-items-center cursor-pointer" id="profileDropdown"
+                        data-bs-toggle="dropdown">
+                        <img id="adminProfileImg"
+                            src="https://ui-avatars.com/api/?name=Admin&background=1a4f8a&color=fff"
+                            class="rounded-circle shadow-sm" width="45" height="45">
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3">
-                        <li><a class="dropdown-item py-2" href="#" onclick="viewMyProfile(event)"><i class="fas fa-user-circle me-2"></i> My Profile</a></li>
+                        <li><a class="dropdown-item py-2" href="#" onclick="viewMyProfile(event)"><i
+                                    class="fas fa-user-circle me-2"></i> My Profile</a></li>
                         <li><a class="dropdown-item py-2" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item py-2 text-danger" href="#" onclick="logout()"><i class="fas fa-power-off me-2"></i> Logout</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item py-2 text-danger" href="#" onclick="logout()"><i
+                                    class="fas fa-power-off me-2"></i> Logout</a></li>
                     </ul>
                 </div>
             </div>
@@ -71,14 +80,17 @@
             <section id="dashboard" class="animated">
                 <div class="row g-4 mb-4">
                     <div class="col-md-3" onclick="showSection('employees')" style="cursor: pointer;">
-                        <div class="card stat-card p-4 bg-white border-0 shadow-sm border-start border-primary border-4">
+                        <div
+                            class="card stat-card p-4 bg-white border-0 shadow-sm border-start border-primary border-4">
                             <h6 class="text-secondary small fw-bold mb-1">TOTAL EMPLOYEES</h6>
                             <h2 class="fw-bold mb-0" id="totalEmployeesCount">0</h2>
-                            <p class="text-success small mt-2 mb-0"><i class="fas fa-users me-1"></i> Active Workforce</p>
+                            <p class="text-success small mt-2 mb-0"><i class="fas fa-users me-1"></i> Active Workforce
+                            </p>
                         </div>
                     </div>
                     <div class="col-md-3" onclick="showSection('payroll')" style="cursor: pointer;">
-                        <div class="card stat-card p-4 bg-white border-0 shadow-sm border-start border-success border-4">
+                        <div
+                            class="card stat-card p-4 bg-white border-0 shadow-sm border-start border-success border-4">
                             <h6 class="text-secondary small fw-bold mb-1">MONTHLY PAYROLL</h6>
                             <h2 class="fw-bold mb-0" id="totalPayrollBudget">₹ 0</h2>
                             <p class="text-secondary small mt-2 mb-0">Estimated for April</p>
@@ -92,7 +104,8 @@
                         </div>
                     </div>
                     <div class="col-md-3" onclick="showSection('reports')" style="cursor: pointer;">
-                        <div class="card stat-card p-4 bg-white border-0 shadow-sm border-start border-warning border-4">
+                        <div
+                            class="card stat-card p-4 bg-white border-0 shadow-sm border-start border-warning border-4">
                             <h6 class="text-secondary small fw-bold mb-1">PENDING LEAVES</h6>
                             <h2 class="fw-bold mb-0">08</h2>
                             <p class="text-warning small mt-2 mb-0">Action Required</p>
@@ -105,7 +118,8 @@
                         <div class="card border-0 shadow-sm p-4 h-100">
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h5 class="fw-bold">Recent Payroll Activities</h5>
-                                <button class="btn btn-sm btn-light" onclick="showSection('employees')">View All</button>
+                                <button class="btn btn-sm btn-light" onclick="showSection('employees')">View
+                                    All</button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle">
@@ -128,14 +142,23 @@
                         <div class="card border-0 shadow-sm p-4 h-100">
                             <h5 class="fw-bold mb-4">Leave Distribution</h5>
                             <div class="py-3">
-                                <div class="d-flex justify-content-between mb-2"><span>Sick Leave</span><span class="fw-bold text-danger">15%</span></div>
-                                <div class="progress mb-4" style="height: 8px;"><div class="progress-bar bg-danger" style="width: 15%"></div></div>
-                                
-                                <div class="d-flex justify-content-between mb-2"><span>Casual Leave</span><span class="fw-bold text-primary">60%</span></div>
-                                <div class="progress mb-4" style="height: 8px;"><div class="progress-bar bg-primary" style="width: 60%"></div></div>
-                                
-                                <div class="d-flex justify-content-between mb-2"><span>Earned Leave</span><span class="fw-bold text-success">25%</span></div>
-                                <div class="progress" style="height: 8px;"><div class="progress-bar bg-success" style="width: 25%"></div></div>
+                                <div class="d-flex justify-content-between mb-2"><span>Sick Leave</span><span
+                                        class="fw-bold text-danger">15%</span></div>
+                                <div class="progress mb-4" style="height: 8px;">
+                                    <div class="progress-bar bg-danger" style="width: 15%"></div>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2"><span>Casual Leave</span><span
+                                        class="fw-bold text-primary">60%</span></div>
+                                <div class="progress mb-4" style="height: 8px;">
+                                    <div class="progress-bar bg-primary" style="width: 60%"></div>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2"><span>Earned Leave</span><span
+                                        class="fw-bold text-success">25%</span></div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: 25%"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -150,11 +173,15 @@
                         <div class="d-flex gap-2 align-items-center">
                             <div class="search-box d-none d-md-flex me-2">
                                 <i class="fas fa-search text-secondary"></i>
-                                <input type="text" id="employeeSearchInput" placeholder="Search employees..." onkeyup="filterEmployees()" style="border:none; outline:none; background:transparent;">
+                                <input type="text" id="employeeSearchInput" placeholder="Search employees..."
+                                    onkeyup="filterEmployees()"
+                                    style="border:none; outline:none; background:transparent;">
                             </div>
                             <div class="d-flex align-items-center gap-3">
-                                <button class="btn btn-primary-custom" onclick="simulateAddEmployee()"><i class="fas fa-plus me-2"></i>Add Member</button>
-                                <button class="btn btn-outline-secondary" onclick="exportEmployeeList()"><i class="fas fa-download me-2"></i>Export</button>
+                                <button class="btn btn-primary-custom" onclick="simulateAddEmployee()"><i
+                                        class="fas fa-plus me-2"></i>Add Member</button>
+                                <button class="btn btn-outline-secondary" onclick="exportEmployeeList()"><i
+                                        class="fas fa-download me-2"></i>Export</button>
                             </div>
                         </div>
                     </div>
@@ -183,21 +210,24 @@
                 <div class="card border-0 shadow-sm p-4">
                     <h5 class="fw-bold mb-4">Payroll Management</h5>
                     <div class="alert alert-info border-0 shadow-sm">
-                        <i class="fas fa-info-circle me-2"></i> Payroll cycle for <strong>April 2026</strong> is currently open. 38/42 records verified.
+                        <i class="fas fa-info-circle me-2"></i> Payroll cycle for <strong>April 2026</strong> is
+                        currently open. 38/42 records verified.
                     </div>
                     <div class="row g-4 mt-2">
                         <div class="col-md-4">
                             <div class="p-4 bg-light rounded-4 text-center">
                                 <h6 class="text-secondary small fw-bold">TAX DEDUCTION RATE</h6>
                                 <h3 class="fw-bold text-primary" id="globalTaxRate">10% - 20%</h3>
-                                <button class="btn btn-sm btn-outline-primary mt-2" onclick="updateGlobalTax()">Update Rules</button>
+                                <button class="btn btn-sm btn-outline-primary mt-2" onclick="updateGlobalTax()">Update
+                                    Rules</button>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="p-4 bg-light rounded-4 text-center">
                                 <h6 class="text-secondary small fw-bold">TOTAL DISBURSEMENT</h6>
                                 <h3 class="fw-bold text-success">₹ 28,45,000</h3>
-                                <button class="btn btn-sm btn-success mt-2" onclick="simulatePayrollRelease()">Release Now</button>
+                                <button class="btn btn-sm btn-success mt-2"
+                                    onclick="simulatePayrollRelease()">Released</button>
                             </div>
                         </div>
                     </div>
@@ -211,7 +241,8 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-3">
                             <label class="small fw-bold text-secondary">Select Date</label>
-                            <input type="date" class="form-control" id="attendanceDateSelect" value="2026-04-14" onchange="generateMockAttendance()">
+                            <input type="date" class="form-control" id="attendanceDateSelect" value="2026-04-14"
+                                onchange="generateMockAttendance()">
                         </div>
                     </div>
                     <div class="table-responsive">
@@ -238,7 +269,7 @@
     </div>
 
     <!-- Employee Details Modal -->
-    <div class="modal fade" id="employeeDetailsModal" tabindex="-1">
+    <div class="modal fade" id="employeeDetailsModal">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header bg-primary text-white rounded-top-4 py-3">
@@ -247,7 +278,8 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="text-center mb-4">
-                        <img src="https://ui-avatars.com/api/?name=User&background=random" id="modalProfImg" class="rounded-circle mb-3 shadow-sm" width="80">
+                        <img src="https://ui-avatars.com/api/?name=User&background=random" id="modalProfImg"
+                            class="rounded-circle mb-3 shadow-sm" width="80">
                         <h4 class="fw-bold mb-0" id="modalEmpName">---</h4>
                         <p class="text-secondary" id="modalEmpId">PAY-XXX</p>
                     </div>
@@ -271,7 +303,8 @@
                     </div>
                     <div class="mt-4 pt-3 border-top">
                         <button class="btn btn-outline-danger w-100 mb-2" id="suspendActionBtn">Suspend Account</button>
-                        <button class="btn btn-primary-custom w-100" id="updateSalaryBtn">Update Salary Structure</button>
+                        <button class="btn btn-primary-custom w-100" id="updateSalaryBtn">Update Salary
+                            Structure</button>
                     </div>
                 </div>
             </div>
@@ -285,4 +318,5 @@
     <script>checkAuth('ADMIN');</script>
     <script src="js/dashboard.js"></script>
 </body>
+
 </html>

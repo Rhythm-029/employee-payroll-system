@@ -70,6 +70,8 @@ CREATE TABLE password_reset_tokens (
 INSERT INTO users (name, email, password, role, status) VALUES 
 ('HR Administrator', 'admin@hr.com', 'admin123', 'ADMIN', 'ACTIVE');
 
+-- 0. Nimesh Bumb (Mentor)
+INSERT INTO users (name, email, password, role) VALUES ('Nimesh Bumb', 'nimesh@hr.com', 'nimesh', 'EMPLOYEE');
 -- 1. Rhythm Singhal (firstname@hr.com / firstname)
 INSERT INTO users (name, email, password, role) VALUES ('Rhythm Singhal', 'rhythm@hr.com', 'rhythm', 'EMPLOYEE');
 -- 2. Yashwardhan Singh
@@ -126,6 +128,12 @@ INSERT INTO users (name, email, password, role) VALUES
 -- Link all 42 users to employees table
 INSERT INTO employees (user_id, type, base_salary, bonus, tax_percentage, department, designation)
 SELECT id, 'FullTime', 55000 + (id * 500), 4500, 10.0, 
-       CASE WHEN id % 5 = 0 THEN 'Engineering' WHEN id % 5 = 1 THEN 'Product' WHEN id % 5 = 2 THEN 'HR' WHEN id % 5 = 3 THEN 'Marketing' ELSE 'Finance' END,
-       CASE WHEN id % 3 = 0 THEN 'Lead Specialist' WHEN id % 3 = 1 THEN 'Senior Associate' ELSE 'Process Manager' END
+       CASE 
+            WHEN name = 'Nimesh Bumb' THEN 'Management'
+            WHEN name IN ('Rhythm Singhal', 'Prathamesh Bhandare', 'Yashwardhan Singh') THEN 'Executive'
+            WHEN id % 5 = 0 THEN 'Engineering' WHEN id % 5 = 1 THEN 'Product' WHEN id % 5 = 2 THEN 'HR' WHEN id % 5 = 3 THEN 'Marketing' ELSE 'Finance' END,
+       CASE 
+            WHEN name = 'Nimesh Bumb' THEN 'Mentor'
+            WHEN name IN ('Rhythm Singhal', 'Prathamesh Bhandare', 'Yashwardhan Singh') THEN 'Founder'
+            WHEN id % 3 = 0 THEN 'Lead Specialist' WHEN id % 3 = 1 THEN 'Senior Associate' ELSE 'Process Manager' END
 FROM users WHERE role = 'EMPLOYEE';

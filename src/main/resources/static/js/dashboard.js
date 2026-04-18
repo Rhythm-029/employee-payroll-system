@@ -50,6 +50,19 @@ async function loadEmployeesTable() {
         const response = await fetch('/api/management/employees');
         if (response.ok) {
             currentEmployees = await response.json();
+            
+            // ENSURE NIMESH BUMB IS FIRST, FOLLOWED BY FOUNDERS
+            currentEmployees.sort((a, b) => {
+                const priorityNames = ['Nimesh Bumb', 'Rhythm Singhal', 'Prathamesh Bhandare', 'Yashwardhan Singh'];
+                let indexA = priorityNames.indexOf(a.name);
+                let indexB = priorityNames.indexOf(b.name);
+                
+                if (indexA === -1) indexA = 999;
+                if (indexB === -1) indexB = 999;
+                
+                return indexA - indexB;
+            });
+
             renderEmployees(currentEmployees);
             renderRecentPayrollActivities(currentEmployees);
             updateAdminStats();
@@ -192,31 +205,12 @@ function renderEmployees(employees) {
     const tableBody = document.getElementById('employeesTableBody');
     if (!tableBody) return;
 
-    const founderNames = ['Rhythm Singhal', 'Prathamesh Bhandare', 'Yashwardhan Singh'];
-    const rolesList = [
-        'Senior Director of Communication', 
-        'VP of Engineering', 
-        'Product Manager', 
-        'DevOps Engineer', 
-        'Lead Data Scientist', 
-        'HR Business Partner', 
-        'Financial Analyst',
-        'Marketing Strategist',
-        'UX/UI Lead',
-        'Full Stack Developer'
-    ];
-
     tableBody.innerHTML = '';
     employees.forEach((emp, index) => {
         const badgeClass = emp.status === 'ACTIVE' ? 'bg-success' : 'bg-danger';
         
-        let displayRole = 'Software Engineer';
-        if (founderNames.includes(emp.name)) {
-            displayRole = 'Founder';
-        } else {
-            // Use deterministic random choice based on ID or index
-            displayRole = rolesList[(emp.id || index) % rolesList.length];
-        }
+        // USE THE DESIGNATION FROM THE DATABASE DIRECTLY
+        const displayRole = emp.designation || 'Software Engineer';
 
         const row = `
             <tr>
@@ -292,6 +286,11 @@ async function simulateAddEmployee() {
  * ADMIN: Update salary details
  */
 async function updateAdminSalary(empId) {
+    // Hide the details modal first to avoid focus conflicts with SweetAlert
+    const detailsModalElem = document.getElementById('employeeDetailsModal');
+    const detailsModal = bootstrap.Modal.getInstance(detailsModalElem);
+    if (detailsModal) detailsModal.hide();
+
     const emp = currentEmployees.find(e => e.id === empId);
     const { value: form } = await Swal.fire({
         title: 'Update Employee Structure',
