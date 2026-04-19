@@ -2,6 +2,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS password_reset_tokens;
+DROP TABLE IF EXISTS leave_requests;
 DROP TABLE IF EXISTS attendance;
 DROP TABLE IF EXISTS payroll;
 DROP TABLE IF EXISTS employees;
@@ -54,6 +55,18 @@ CREATE TABLE attendance (
     employee_id INT NOT NULL,
     date DATE NOT NULL,
     status VARCHAR(20) DEFAULT 'Present',
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+-- 4.5. Leave Requests Table
+CREATE TABLE leave_requests (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    leave_type VARCHAR(20) NOT NULL,
+    status VARCHAR(20) DEFAULT 'PENDING',
+    reason VARCHAR(255),
     FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
 );
 
@@ -137,3 +150,9 @@ SELECT id, 'FullTime', 55000 + (id * 500), 4500, 10.0,
             WHEN name IN ('Rhythm Singhal', 'Prathamesh Bhandare', 'Yashwardhan Singh') THEN 'Founder'
             WHEN id % 3 = 0 THEN 'Lead Specialist' WHEN id % 3 = 1 THEN 'Senior Associate' ELSE 'Process Manager' END
 FROM users WHERE role = 'EMPLOYEE';
+
+-- Seed initial leave requests
+INSERT INTO leave_requests (employee_id, start_date, end_date, leave_type, status, reason) VALUES
+(1, '2026-04-10', '2026-04-11', 'SICK', 'APPROVED', 'Fever'),
+(2, '2026-04-20', '2026-04-22', 'PAID', 'PENDING', 'Family Vacation'),
+(3, '2026-04-15', '2026-04-15', 'SICK', 'PENDING', 'Dentist Appointment');

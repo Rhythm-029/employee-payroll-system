@@ -20,8 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('employeesTableBody')) {
         loadEmployeesTable(); // Admin view
         updateAdminStats(); // Real-time stats
+        if (document.getElementById('adminLeaveCalendar')) {
+            initAdminLeaveCalendar();
+        }
     } else if (document.getElementById('empProfileSection')) {
         loadEmployeeProfile(userId); // Employee view
+        if (document.getElementById('myLeavesTableBody')) {
+            loadMyLeaves(userId);
+        }
     }
 });
 
@@ -536,6 +542,13 @@ function showSection(sectionId) {
     document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
     const activeLink = document.querySelector(`.sidebar-link[onclick*="${sectionId}"]`);
     if (activeLink) activeLink.classList.add('active');
+    
+    // Fix FullCalendar sizing issue when container becomes visible
+    if (sectionId === 'leaveCalendar' && typeof calendar !== 'undefined') {
+        setTimeout(() => {
+            calendar.updateSize();
+        }, 100);
+    }
 }
 
 async function updateGlobalTax() {
@@ -598,3 +611,212 @@ function updateEmployeeAttendance() {
         tbody.innerHTML += `<tr><td>${row.date}</td><td>${row.in}</td><td>${row.out}</td><td>${row.hrs}</td><td><span class="badge ${row.class}">${row.status}</span></td></tr>`;
     });
 }
+
+// ==========================================
+// LEAVE MANAGEMENT LOGIC
+// ==========================================
+
+async function loadMyLeaves(userId) {
+    try {
+        const response = await fetch(`/api/management/leaves/mine/${userId}`);
+        const leaves = await response.json();
+        const tbody = document.getElementById('myLeavesTableBody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        if (leaves.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary">No leaves applied yet.</td></tr>';
+            return;
+        }
+
+        leaves.forEach(leave => {
+            let badgeClass = leave.status === 'APPROVED' ? 'bg-success' : (leave.status === 'PENDING' ? 'bg-warning text-dark' : 'bg-danger');
+            tbody.innerHTML += `
+                <tr>
+                    <td><span class="badge bg-secondary">${leave.leaveType}</span></td>
+                    <td>${leave.startDate}</td>
+                    <td>${leave.endDate}</td>
+                    <td>${leave.reason}</td>
+                    <td><span class="badge ${badgeClass}">${leave.status}</span></td>
+                </tr>
+            `;
+        });
+    } catch (e) {
+        console.error('Failed to load leaves', e);
+    }
+}
+
+async function submitLeaveRequest() {
+    const userId = localStorage.getItem('userId');
+    const type = document.getElementById('leaveTypeInput').value;
+    const startDate = document.getElementById('leaveStartDate').value;
+    const endDate = document.getElementById('leaveEndDate').value;
+    const reason = document.getElementById('leaveReason').value;
+
+    if (!startDate || !endDate || !reason) {
+        showToast('Warning', 'Please fill all fields', 'warning');
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/management/leaves/apply/${userId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ leaveType: type, startDate, endDate, reason })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            showToast('Success', 'Leave requested successfully', 'success');
+            document.getElementById('leaveApplicationForm').reset();
+            loadMyLeaves(userId);
+        } else {
+            showToast('Error', data.message, 'error');
+        }
+    } catch (e) {
+        showToast('Error', 'Failed to apply leave', 'error');
+    }
+}
+
+let calendar;
+async function initAdminLeaveCalendar() {
+    const calendarEl = document.getElementById('adminLeaveCalendar');
+    if (!calendarEl || !window.FullCalendar) return;
+
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth'
+        },
+        height: 600,
+        eventClick: function(info) {
+            handleLeaveEventClick(info.event);
+        }
+    });
+
+    calendar.render();
+    await fetchAllLeavesForCalendar();
+}
+
+async function fetchAllLeavesForCalendar() {
+    try {
+        const response = await fetch('/api/management/leaves');
+        const leaves = await response.json();
+        
+        calendar.removeAllEvents();
+        
+        let pendingCount = 0;
+        const tbody = document.getElementById('adminLeavesListTableBody');
+        if (tbody) tbody.innerHTML = '';
+        
+        const events = leaves.map(l => {
+            let color = l.status === 'APPROVED' ? '#28a745' : (l.status === 'PENDING' ? '#ffc107' : '#dc3545');
+            let textColor = l.status === 'PENDING' ? '#000' : '#fff';
+            
+            if (l.status === 'PENDING') {
+                pendingCount++;
+            }
+            
+            if (tbody) {
+                let badgeClass = l.status === 'APPROVED' ? 'bg-success' : (l.status === 'PENDING' ? 'bg-warning text-dark' : 'bg-danger');
+                let actionBtns = l.status === 'PENDING' ? 
+                    `<button class="btn btn-sm btn-outline-success me-1" onclick="updateLeaveStatusAdmin(${l.id}, 'APPROVED')"><i class="fas fa-check"></i></button>
+                     <button class="btn btn-sm btn-outline-danger" onclick="updateLeaveStatusAdmin(${l.id}, 'REJECTED')"><i class="fas fa-times"></i></button>` 
+                    : `<span class="text-secondary small">Resolved</span>`;
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td><div class="d-flex align-items-center"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(l.employeeName)}&background=random" class="rounded-circle me-2" width="30"> ${l.employeeName}</div></td>
+                        <td><span class="badge border border-secondary text-secondary">${l.leaveType}</span></td>
+                        <td>${l.startDate} to ${l.endDate}</td>
+                        <td><div class="text-truncate" style="max-width: 150px;" title="${l.reason}">${l.reason}</div></td>
+                        <td><span class="badge ${badgeClass}">${l.status}</span></td>
+                        <td>${actionBtns}</td>
+                    </tr>
+                `;
+            }
+
+            return {
+                id: l.id,
+                title: `${l.employeeName} (${l.leaveType})`,
+                start: l.startDate,
+                end: new Date(new Date(l.endDate).getTime() + 86400000).toISOString().split('T')[0], // exclusive end date for fullcalendar
+                color: color,
+                textColor: textColor,
+                extendedProps: {
+                    status: l.status,
+                    reason: l.reason,
+                    employeeName: l.employeeName
+                }
+            };
+        });
+        calendar.addEventSource(events);
+        
+        const countElem = document.getElementById('pendingLeavesCount');
+        if (countElem) {
+            countElem.textContent = pendingCount < 10 ? '0' + pendingCount : pendingCount;
+        }
+        
+    } catch (e) {
+        console.error('Failed to fetch leaves for calendar', e);
+    }
+}
+
+async function handleLeaveEventClick(event) {
+    const props = event.extendedProps;
+    let htmlContent = `
+        <div class="text-start">
+            <p><strong>Employee:</strong> ${props.employeeName}</p>
+            <p><strong>Status:</strong> ${props.status}</p>
+            <p><strong>Reason:</strong> ${props.reason}</p>
+            <p><strong>Dates:</strong> ${event.startStr} to ${new Date(event.end.getTime() - 86400000).toISOString().split('T')[0]}</p>
+        </div>
+    `;
+
+    if (props.status === 'PENDING') {
+        const result = await Swal.fire({
+            title: 'Leave Request',
+            html: htmlContent,
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: 'Approve',
+            denyButtonText: 'Reject',
+            cancelButtonText: 'Close',
+            confirmButtonColor: '#28a745',
+            denyButtonColor: '#dc3545'
+        });
+
+        if (result.isConfirmed) {
+            await updateLeaveStatusAdmin(event.id, 'APPROVED');
+        } else if (result.isDenied) {
+            await updateLeaveStatusAdmin(event.id, 'REJECTED');
+        }
+    } else {
+        Swal.fire({
+            title: 'Leave Request Details',
+            html: htmlContent,
+            confirmButtonText: 'Close'
+        });
+    }
+}
+
+async function updateLeaveStatusAdmin(leaveId, status) {
+    try {
+        const res = await fetch(`/api/management/leaves/${leaveId}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            showToast('Success', `Leave ${status.toLowerCase()}`, 'success');
+            fetchAllLeavesForCalendar();
+        } else {
+            showToast('Error', data.message, 'error');
+        }
+    } catch (e) {
+        showToast('Error', 'Failed to update leave', 'error');
+    }
+}
+

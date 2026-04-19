@@ -31,6 +31,9 @@
             <a href="#" class="sidebar-link" onclick="showSection('attendance')">
                 <i class="fas fa-calendar-alt"></i> <span>Attendance</span>
             </a>
+            <a href="#" class="sidebar-link" onclick="showSection('leaves')">
+                <i class="fas fa-calendar-plus"></i> <span>My Leaves</span>
+            </a>
             <a href="#" class="sidebar-link" onclick="showSection('shift')">
                 <i class="fas fa-clock"></i> <span>Shift Details</span>
             </a>
@@ -58,9 +61,12 @@
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
                 </button>
                 <div class="dropdown">
-                    <div class="d-flex align-items-center cursor-pointer" data-bs-toggle="dropdown">
-                        <img id="empProfileImg" src="https://ui-avatars.com/api/?name=Employee&background=3498db&color=fff" class="rounded-circle shadow-sm" width="45" height="45">
-                    </div>
+                    <img id="empProfileImg" src="https://ui-avatars.com/api/?name=Employee&background=3498db&color=fff" class="rounded-circle shadow-sm dropdown-toggle cursor-pointer" data-bs-toggle="dropdown" aria-expanded="false" width="45" height="45" style="cursor:pointer;">
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                        <li><a class="dropdown-item py-2" href="#" onclick="showSection('profile')"><i class="fas fa-user-circle me-2"></i> My Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="#" onclick="logout()"><i class="fas fa-power-off me-2"></i> Logout</a></li>
+                    </ul>
                 </div>
             </div>
         </header>
@@ -85,7 +91,7 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card stat-card p-4 bg-white border-start border-info border-4 shadow-sm">
+                        <div class="card stat-card p-4 bg-white border-start border-info border-4 shadow-sm" onclick="showSection('leaves')" style="cursor: pointer;">
                             <h6 class="text-secondary small fw-bold mb-1">LEAVES TAKEN</h6>
                             <h2 class="fw-bold mb-0" id="leavesLeft">0</h2>
                             <p class="text-info small mt-2 mb-0">Month: April</p>
@@ -215,6 +221,62 @@
                                 <tr><td>10 April 2026</td><td>09:00 AM</td><td>06:00 PM</td><td>9h 00m</td><td><span class="badge bg-success">Present</span></td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- My Leaves Section -->
+            <section id="leaves" class="d-none animated">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm p-4 h-100">
+                            <h5 class="fw-bold mb-4">Apply for Leave</h5>
+                            <form id="leaveApplicationForm">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Leave Type</label>
+                                    <select id="leaveTypeInput" class="form-select bg-light border-0 shadow-sm" required>
+                                        <option value="SICK">Sick Leave</option>
+                                        <option value="PAID">Paid Leave</option>
+                                    </select>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold">Start Date</label>
+                                        <input type="date" id="leaveStartDate" class="form-control bg-light border-0 shadow-sm" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold">End Date</label>
+                                        <input type="date" id="leaveEndDate" class="form-control bg-light border-0 shadow-sm" required>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label small fw-bold">Reason</label>
+                                    <textarea id="leaveReason" class="form-control bg-light border-0 shadow-sm" rows="3" required></textarea>
+                                </div>
+                                <button type="button" class="btn btn-primary-custom w-100" onclick="submitLeaveRequest()">Submit Request</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card border-0 shadow-sm p-4 h-100">
+                            <h5 class="fw-bold mb-4">My Leave History</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                            <th>Reason</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="myLeavesTableBody">
+                                        <!-- Dynamically loaded via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

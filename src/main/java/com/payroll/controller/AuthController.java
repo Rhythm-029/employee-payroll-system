@@ -63,7 +63,8 @@ public class AuthController {
         } catch (Exception e) {
             // Usually EmptyResultDataAccessException if not found
             response.put("status", "error");
-            response.put("message", "Invalid email or password.");
+            response.put("message", "Invalid email or password. Error: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return response;
