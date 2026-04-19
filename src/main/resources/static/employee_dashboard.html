@@ -56,10 +56,6 @@
                 <p id="empName" class="text-secondary small mb-0 fw-bold">Welcome, ---</p>
             </div>
             <div class="d-flex align-items-center gap-4">
-                <button class="btn btn-outline-secondary position-relative me-3" onclick="showToast('Notifications', 'You have no new messages.', 'info')">
-                    <i class="fas fa-bell"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
-                </button>
                 <div class="dropdown">
                     <img id="empProfileImg" src="https://ui-avatars.com/api/?name=Employee&background=3498db&color=fff" class="rounded-circle shadow-sm dropdown-toggle cursor-pointer" data-bs-toggle="dropdown" aria-expanded="false" width="45" height="45" style="cursor:pointer;">
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
@@ -237,6 +233,7 @@
                                     <select id="leaveTypeInput" class="form-select bg-light border-0 shadow-sm" required>
                                         <option value="SICK">Sick Leave</option>
                                         <option value="PAID">Paid Leave</option>
+                                        <option value="UNPAID">Unpaid Leave</option>
                                     </select>
                                 </div>
                                 <div class="row g-2 mb-3">
